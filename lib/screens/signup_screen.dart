@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/role_service.dart';
-import '../widgets/custom_input.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -60,45 +59,81 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const cafeColor = Color(0xFF6F4E37);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              if (_error != null)
-                Text(_error!, style: const TextStyle(color: Colors.red)),
-              CustomInput(
-                controller: _emailController,
-                label: 'Email',
-                validator: (v) =>
-                v!.isEmpty ? 'Ingresa tu email' : null,
-              ),
-              CustomInput(
-                controller: _passwordController,
-                label: 'Contraseña',
-                obscure: true,
-                validator: (v) =>
-                v!.isEmpty ? 'Ingresa tu contraseña' : null,
-              ),
-              DropdownButtonFormField<String>(
-                value: _selectedRole,
-                items: _roles
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                    .toList(),
-                onChanged: (value) => setState(() => _selectedRole = value),
-                decoration: const InputDecoration(labelText: 'Rol'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _register,
-                child: _isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text('Registrarse'),
-              ),
-            ],
+      backgroundColor: Colors.grey[100],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                const Icon(Icons.person_add, size: 64, color: cafeColor),
+                const SizedBox(height: 8),
+                const Text('Registro',
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: cafeColor)),
+                const SizedBox(height: 32),
+                if (_error != null)
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                  validator: (value) =>
+                  value!.isEmpty ? 'Ingresa tu email' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                  validator: (value) =>
+                  value!.isEmpty ? 'Ingresa tu contraseña' : null,
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  items: _roles
+                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _selectedRole = value),
+                  decoration: const InputDecoration(
+                    labelText: 'Rol',
+                    prefixIcon: Icon(Icons.badge),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cafeColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: _isLoading ? null : _register,
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Registrarse'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('¿Ya tienes cuenta? Inicia sesión'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
