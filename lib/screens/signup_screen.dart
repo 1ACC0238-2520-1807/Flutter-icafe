@@ -102,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   items: _roles
                       .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                       .toList(),

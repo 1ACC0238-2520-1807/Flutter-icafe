@@ -4,7 +4,7 @@ import '../models/role.dart';
 import '../utils/secure_storage.dart';
 
 class RoleService {
-  static const baseUrl = 'http://<10.0.2.2>:8080/ap/v1/roles';
+  static const baseUrl = 'http://<10.0.2.2>:8080/api/v1/roles';
 
   Future<List<Role>> getAllRoles() async {
     final token = await SecureStorage.readToken();
