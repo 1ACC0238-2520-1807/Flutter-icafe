@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
+import '../../auth/domain/user.dart';
 
 class UserDetailScreen extends StatelessWidget {
   final User user;

@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/authenticated_user.dart';
+import 'package:icafe_flutter/core/constants/api_constants.dart';
+import '../domain/authenticated_user.dart';
 
 class AuthService {
-  static const baseUrl = 'http://<10.0.2.2>:8080/api/v1/authentication';
-
+final Uri uri = Uri.parse(
+      ApiConstants.baseUrl,
+    ).replace(path: ApiConstants.authEndpoint);
   Future<AuthenticatedUser> signIn(String email, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/sign-in'),
+      Uri.parse('$uri/sign-in'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
@@ -21,7 +23,7 @@ class AuthService {
 
   Future<void> signUp(String email, String password, List<String> roles) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/sign-up'),
+      Uri.parse('$uri/sign-up'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password, 'roles': roles}),
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
-import '../services/user_service.dart';
-import '../utils/secure_storage.dart';
-import 'login_screen.dart';
-import '../widgets/role_chip.dart';
+import '../../auth/domain/user.dart';
+import '../../auth/data/user_service.dart';
+import '../../auth/data/secure_storage.dart';
+import '../../auth/presentation/login_screen.dart';
+import '../../../shared/widgets/role_chip.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

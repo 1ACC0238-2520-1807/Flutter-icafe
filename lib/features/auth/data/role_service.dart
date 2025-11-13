@@ -1,15 +1,25 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/role.dart';
-import '../utils/secure_storage.dart';
+import 'package:icafe_flutter/core/constants/api_constants.dart';
+import '../domain/role.dart';
+import 'secure_storage.dart';
 
 class RoleService {
-  static const baseUrl = 'http://<10.0.2.2>:8080/api/v1/roles';
+final Uri uri = Uri.parse(
+      ApiConstants.baseUrl,
+    ).replace(path: ApiConstants.roleEndpoint);
+  // Roles disponibles sin autenticación (para registro)
+  Future<List<Role>> getRolesForSignup() async {
+    return [
+      Role(id: 1, name: 'ADMIN'),
+      Role(id: 2, name: 'OWNER'),
+    ];
+  }
 
   Future<List<Role>> getAllRoles() async {
     final token = await SecureStorage.readToken();
     final response = await http.get(
-      Uri.parse(baseUrl),
+      uri,
       headers: {'Authorization': 'Bearer $token'},
     );
 

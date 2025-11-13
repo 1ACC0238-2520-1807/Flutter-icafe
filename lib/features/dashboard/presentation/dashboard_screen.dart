@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
-import '../models/user.dart';
-import '../utils/secure_storage.dart';
-import '../widgets/user_card.dart';
-import 'login_screen.dart';
+import '../../auth/data/user_service.dart';
+import '../../auth/domain/user.dart';
+import '../../auth/data/secure_storage.dart';
+import '../../../shared/widgets/user_card.dart';
+import '../../auth/presentation/login_screen.dart';
 import 'user_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {

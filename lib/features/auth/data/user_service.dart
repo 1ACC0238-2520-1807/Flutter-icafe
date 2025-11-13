@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/user.dart';
-import '../utils/secure_storage.dart';
+import 'package:icafe_flutter/core/constants/api_constants.dart';
+import '../domain/user.dart';
+import 'secure_storage.dart';
 
 class UserService {
-  static const baseUrl = 'http://<10.0.2.2>:8080/api/v1/users';
-
+final Uri uri = Uri.parse(
+      ApiConstants.baseUrl,
+    ).replace(path: ApiConstants.userEndpoint);
   Future<List<User>> getAllUsers() async {
     final token = await SecureStorage.readToken();
 
     final response = await http.get(
-      Uri.parse(baseUrl),
+      uri,
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -26,7 +28,7 @@ class UserService {
     final token = await SecureStorage.readToken();
 
     final response = await http.get(
-      Uri.parse('$baseUrl/email/$email'),
+      Uri.parse('$uri/email/$email'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
