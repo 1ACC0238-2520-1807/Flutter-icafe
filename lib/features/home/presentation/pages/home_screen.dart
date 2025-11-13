@@ -5,6 +5,7 @@ import '../../data/repositories/branch_service.dart';
 import '../../domain/entities/branch.dart';
 import '../widgets/my_cafeteria_card.dart';
 import '../widgets/sede_item.dart';
+import 'add_edit_sede_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,8 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onEditSede(Branch sede) {
-    // TODO: Implementar pantalla de edición
-    print('Editar sede: ${sede.name}');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEditSedeScreen(
+          sede: sede,
+          onSedeAdded: _loadSedes,
+        ),
+      ),
+    );
   }
 
   void _onDeleteSede(Branch sede) {
@@ -106,8 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onAddSede() {
-    // TODO: Implementar pantalla de crear sede
-    print('Crear nueva sede');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEditSedeScreen(
+          onSedeAdded: _loadSedes,
+        ),
+      ),
+    );
   }
 
   Future<void> _onLogout() async {

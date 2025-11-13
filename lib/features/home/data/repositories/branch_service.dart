@@ -61,9 +61,8 @@ class BranchService {
 
   Future<Branch> createBranch({
     required String name,
-    required String location,
+    required String address,
     required String ownerId,
-    String? description,
   }) async {
     final token = await SecureStorage.readToken();
     
@@ -75,8 +74,7 @@ class BranchService {
       },
       body: jsonEncode({
         'name': name,
-        'location': location,
-        'description': description,
+        'address': address,
         'ownerId': ownerId,
       }),
     );
