@@ -6,6 +6,7 @@ import '../../domain/entities/branch.dart';
 import '../widgets/my_cafeteria_card.dart';
 import '../widgets/sede_item.dart';
 import 'add_edit_sede_screen.dart';
+import 'contactos_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,8 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSedeSelected(Branch sede) {
-    // TODO: Navegar a la próxima pantalla con la sede seleccionada
-    print('Sede seleccionada: ${sede.name}');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ContactosScreen(branchId: sede.id),
+      ),
+    );
   }
 
   void _onEditSede(Branch sede) {

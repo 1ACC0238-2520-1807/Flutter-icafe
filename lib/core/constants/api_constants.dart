@@ -4,4 +4,5 @@ class ApiConstants {
   static final String userEndpoint = '/api/v1/users';
   static final String roleEndpoint = '/api/v1/roles';
   static final String branchEndpoint = '/api/v1/branch';
+  static final String contactPortfolioEndpoint = '/api/v1/contact-portfolios';
 }
