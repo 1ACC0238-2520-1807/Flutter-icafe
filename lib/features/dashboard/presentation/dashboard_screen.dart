@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../auth/data/secure_storage.dart';
 import '../../auth/presentation/login_screen.dart';
+import '../../contacts/presentation/contacts_screen.dart';
+import '../../inventory/presentation/inventory_screen.dart';
 import '../data/services/dashboard_service.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -85,26 +87,56 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildCurrentScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildDashboardContent();
+      case 1:
+        return ContactsScreen(
+          branchId: widget.branchId,
+          sedeName: widget.sedeName,
+        );
+      case 2:
+        return InventoryScreen(
+          branchId: widget.branchId,
+          sedeName: widget.sedeName,
+        );
+      case 3:
+        return _buildPlaceholderScreen('Finanzas');
+      case 4:
+        return _buildPlaceholderScreen('Movimiento');
+      default:
+        return _buildDashboardContent();
+    }
+  }
+
+  Widget _buildDashboardContent() {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F3F0),
-      appBar: AppBar(
-        title: const Text('Inicio'),
-        centerTitle: false,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF6F4E37),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: _onLogout,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF5D4037),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
           ),
-        ],
+          child: AppBar(
+            title: const Text('Inicio'),
+            centerTitle: true,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: _onLogout,
+              ),
+            ],
+          ),
+        ),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _dashboardDataFuture,
@@ -244,6 +276,48 @@ class _DashboardScreenState extends State<DashboardScreen>
           );
         },
       ),
+    );
+  }
+
+  Widget _buildPlaceholderScreen(String title) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F3F0),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFF5D4037),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: AppBar(
+            title: Text(title),
+            centerTitle: true,
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+        ),
+      ),
+      body: Center(
+        child: Text(
+          'Próximamente: $title',
+          style: const TextStyle(
+            fontSize: 18,
+            color: Color(0xFF6F4E37),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F3F0),
+      body: _buildCurrentScreen(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -448,6 +522,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 height: 70,
                 decoration: BoxDecoration(
                   color: const Color(0xFF5D4037),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
@@ -481,7 +559,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               Text(
                                 items[index]['label'] as String,
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha:0.6),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 10,
                                 ),
                               ),
@@ -513,7 +591,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha:0.3 * animationValue),
+                          color: Colors.black.withValues(alpha: 0.3 * animationValue),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

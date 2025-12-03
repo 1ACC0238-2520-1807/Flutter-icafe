@@ -19,10 +19,55 @@ class DashboardService {
         'Content-Type': 'application/json',
       };
 
-      // 1. Obtener nombre de la sede
-      final branchUrl = '${ApiConstants.baseUrl}${ApiConstants.branchEndpoint}/$branchId';
-      final branchResponse = await http.get(Uri.parse(branchUrl), headers: headers);
+      // Hacer todas las llamadas en paralelo
+      final results = await Future.wait([
+        // 1. Obtener nombre de la sede
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.branchEndpoint}/$branchId'),
+          headers: headers,
+        ),
+        // 2. Obtener empleados
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/contact-portfolios/$portfolioId/employees'),
+          headers: headers,
+        ),
+        // 3. Obtener proveedores
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/contact-portfolios/$portfolioId/providers'),
+          headers: headers,
+        ),
+        // 4. Obtener insumos de la sede
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/supply-items/$branchId/branch'),
+          headers: headers,
+        ),
+        // 5. Obtener productos de la sede
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/products/branch/$branchId'),
+          headers: headers,
+        ),
+        // 6. Obtener ventas de la sede
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/sales/branch/$branchId'),
+          headers: headers,
+        ),
+        // 7. Obtener órdenes de compra de la sede
+        http.get(
+          Uri.parse('${ApiConstants.baseUrl}/api/v1/purchase-orders/branch/$branchId'),
+          headers: headers,
+        ),
+      ]);
 
+      // Procesar resultados
+      final branchResponse = results[0];
+      final employeesResponse = results[1];
+      final providersResponse = results[2];
+      final supplyItemsResponse = results[3];
+      final productsResponse = results[4];
+      final salesResponse = results[5];
+      final purchaseOrdersResponse = results[6];
+
+      // Validar respuesta de rama
       if (branchResponse.statusCode != 200) {
         throw Exception('Error al obtener información de la sede');
       }
@@ -30,41 +75,27 @@ class DashboardService {
       final branchData = jsonDecode(branchResponse.body);
       final sedeName = branchData['name'] ?? 'Sede';
 
-      // 2. Obtener empleados
-      final employeesUrl =
-          '${ApiConstants.baseUrl}/api/v1/contact-portfolios/$portfolioId/employees';
-      final employeesResponse = await http.get(Uri.parse(employeesUrl), headers: headers);
+      // Procesar empleados
       final totalEmployees = employeesResponse.statusCode == 200
           ? (jsonDecode(employeesResponse.body) as List).length
           : 0;
 
-      // 3. Obtener proveedores
-      final providersUrl =
-          '${ApiConstants.baseUrl}/api/v1/contact-portfolios/$portfolioId/providers';
-      final providersResponse = await http.get(Uri.parse(providersUrl), headers: headers);
+      // Procesar proveedores
       final totalProviders = providersResponse.statusCode == 200
           ? (jsonDecode(providersResponse.body) as List).length
           : 0;
 
-      // 4. Obtener insumos de la sede
-      final supplyItemsUrl =
-          '${ApiConstants.baseUrl}/api/v1/supply-items/$branchId/branch';
-      final supplyItemsResponse = await http.get(Uri.parse(supplyItemsUrl), headers: headers);
+      // Procesar insumos
       final totalSupplyItems = supplyItemsResponse.statusCode == 200
           ? (jsonDecode(supplyItemsResponse.body) as List).length
           : 0;
 
-      // 5. Obtener productos de la sede
-      final productsUrl = '${ApiConstants.baseUrl}/api/v1/products/branch/$branchId';
-      final productsResponse = await http.get(Uri.parse(productsUrl), headers: headers);
+      // Procesar productos
       final totalProducts = productsResponse.statusCode == 200
           ? (jsonDecode(productsResponse.body) as List).length
           : 0;
 
-      // 6. Obtener ventas de la sede
-      final salesUrl = '${ApiConstants.baseUrl}/api/v1/sales/branch/$branchId';
-      final salesResponse = await http.get(Uri.parse(salesUrl), headers: headers);
-
+      // Procesar ventas
       double totalSalesAmount = 0.0;
       int totalSalesCount = 0;
       double averageSaleAmount = 0.0;
@@ -72,7 +103,6 @@ class DashboardService {
       if (salesResponse.statusCode == 200) {
         final salesList = jsonDecode(salesResponse.body) as List;
         totalSalesCount = salesList.length;
-        totalSalesAmount = 0.0;
         for (var sale in salesList) {
           totalSalesAmount += (sale['totalAmount'] as num?)?.toDouble() ?? 0.0;
         }
@@ -80,14 +110,8 @@ class DashboardService {
             totalSalesCount > 0 ? totalSalesAmount / totalSalesCount : 0.0;
       }
 
-      // 7. Obtener órdenes de compra de la sede
-      final purchaseOrdersUrl =
-          '${ApiConstants.baseUrl}/api/v1/purchase-orders/branch/$branchId';
-      final purchaseOrdersResponse =
-          await http.get(Uri.parse(purchaseOrdersUrl), headers: headers);
-
+      // Procesar órdenes de compra
       double totalPurchasesAmount = 0.0;
-
       if (purchaseOrdersResponse.statusCode == 200) {
         final purchaseOrdersList = jsonDecode(purchaseOrdersResponse.body) as List;
         for (var order in purchaseOrdersList) {
