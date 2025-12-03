@@ -122,7 +122,7 @@ class _AddEditSedeScreenState extends State<AddEditSedeScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                color: const Color(0xFF8D6E63).withOpacity(0.7),
+                color: const Color(0xFF8D6E63).withValues(alpha:0.7),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Row(

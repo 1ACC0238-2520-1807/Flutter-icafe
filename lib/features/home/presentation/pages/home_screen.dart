@@ -6,7 +6,7 @@ import '../../domain/entities/branch.dart';
 import '../widgets/my_cafeteria_card.dart';
 import '../widgets/sede_item.dart';
 import 'add_edit_sede_screen.dart';
-import 'contactos_screen.dart';
+import '../../../../features/dashboard/presentation/dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ContactosScreen(branchId: sede.id),
+        builder: (_) => DashboardScreen(
+          branchId: sede.id,
+          sedeName: sede.name,
+        ),
       ),
     );
   }
