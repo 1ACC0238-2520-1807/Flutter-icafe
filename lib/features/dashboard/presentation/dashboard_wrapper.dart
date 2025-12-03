@@ -58,8 +58,8 @@ class _DashboardWrapperState extends State<DashboardWrapper>
         );
       case 2:
         return InventoryScreen(
-          branchId: widget.branchId,
-          sedeName: widget.sedeName,
+          portfolioId: "1",
+          selectedSedeId: widget.branchId.toString(),
         );
       case 3:
         return _buildPlaceholderScreen('Finanzas');
@@ -149,7 +149,6 @@ class _DashboardWrapperState extends State<DashboardWrapper>
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              // Barra simple sin deformación
               Container(
                 height: 70,
                 decoration: BoxDecoration(
@@ -160,7 +159,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, -2),
                     ),
@@ -181,17 +180,16 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                               opacity: isSelected ? 0 : 1,
                               child: Icon(
                                 items[index]['icon'] as IconData,
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color: Colors.white.withOpacity(0.6),
                                 size: 24,
                               ),
                             ),
-                            if (!isSelected)
-                              const SizedBox(height: 8),
+                            if (!isSelected) const SizedBox(height: 8),
                             if (!isSelected)
                               Text(
                                 items[index]['label'] as String,
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.6),
+                                  color: Colors.white.withOpacity(0.6),
                                   fontSize: 10,
                                 ),
                               ),
@@ -203,7 +201,6 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                   }),
                 ),
               ),
-              // Ícono elevado animado
               Positioned(
                 bottom: currentBottom,
                 left: (MediaQuery.of(context).size.width / 5) * _selectedIndex +
@@ -223,7 +220,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3 * animationValue),
+                          color: Colors.black.withOpacity(0.3 * animationValue),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
