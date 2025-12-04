@@ -1,4 +1,3 @@
-import '../../../inventory/data/models/inventory_models.dart';
 
 enum ProductStatus { ACTIVE, ARCHIVED }
 

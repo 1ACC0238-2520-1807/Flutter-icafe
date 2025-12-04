@@ -11,6 +11,8 @@ class MovementsPdfService {
     required List<StockMovement> movements,
     required Map<int, SupplyItemResource> supplyItemsMap,
     required String filterType,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     final pdf = pw.Document();
 
@@ -21,14 +23,14 @@ class MovementsPdfService {
     final greenColor = PdfColor.fromHex('#10B981');
     final redColor = PdfColor.fromHex('#EF4444');
 
-    // Calcular totales
-    double totalEntradas = 0;
-    double totalSalidas = 0;
+    // Calcular totales (número de movimientos, no cantidades)
+    int totalEntradas = 0;
+    int totalSalidas = 0;
     for (final m in movements) {
       if (m.isEntrada) {
-        totalEntradas += m.quantity;
+        totalEntradas++;
       } else {
-        totalSalidas += m.quantity;
+        totalSalidas++;
       }
     }
 
@@ -40,7 +42,7 @@ class MovementsPdfService {
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(40),
-        header: (context) => _buildHeader(darkBrown, dateStr, timeStr, filterType),
+        header: (context) => _buildHeader(darkBrown, dateStr, timeStr, filterType, startDate, endDate),
         footer: (context) => _buildFooter(context, olive),
         build: (context) => [
           pw.SizedBox(height: 20),
@@ -62,12 +64,17 @@ class MovementsPdfService {
     return file;
   }
 
-  static pw.Widget _buildHeader(PdfColor darkBrown, String date, String time, String filterType) {
+  static pw.Widget _buildHeader(PdfColor darkBrown, String date, String time, String filterType, DateTime? startDate, DateTime? endDate) {
     String filterLabel = filterType == 'TODOS' 
         ? 'Todos los movimientos' 
         : filterType == 'ENTRADA' 
             ? 'Solo entradas' 
             : 'Solo salidas';
+
+    String? dateRangeLabel;
+    if (startDate != null && endDate != null) {
+      dateRangeLabel = '${_formatDateShort(startDate)} - ${_formatDateShort(endDate)}';
+    }
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -118,6 +125,20 @@ class MovementsPdfService {
                     style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
                   ),
                 ),
+                if (dateRangeLabel != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex('#8B7355'),
+                      borderRadius: pw.BorderRadius.circular(4),
+                    ),
+                    child: pw.Text(
+                      'Período: $dateRangeLabel',
+                      style: const pw.TextStyle(fontSize: 9, color: PdfColors.white),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -126,6 +147,10 @@ class MovementsPdfService {
         pw.Divider(color: darkBrown, thickness: 2),
       ],
     );
+  }
+
+  static String _formatDateShort(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   static pw.Widget _buildFooter(pw.Context context, PdfColor olive) {
@@ -152,8 +177,8 @@ class MovementsPdfService {
 
   static pw.Widget _buildSummarySection(
     int totalMovements,
-    double totalEntradas,
-    double totalSalidas,
+    int totalEntradas,
+    int totalSalidas,
     PdfColor lightPeach,
     PdfColor greenColor,
     PdfColor redColor,
@@ -169,8 +194,8 @@ class MovementsPdfService {
         mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
         children: [
           _buildSummaryItem('Total Movimientos', totalMovements.toString(), darkBrown),
-          _buildSummaryItem('Total Entradas', '+${totalEntradas.toStringAsFixed(0)}', greenColor),
-          _buildSummaryItem('Total Salidas', '-${totalSalidas.toStringAsFixed(0)}', redColor),
+          _buildSummaryItem('Entradas', totalEntradas.toString(), greenColor),
+          _buildSummaryItem('Salidas', totalSalidas.toString(), redColor),
         ],
       ),
     );

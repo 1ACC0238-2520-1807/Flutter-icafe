@@ -378,7 +378,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             const SizedBox(height: 8),
             Divider(
-              color: const Color(0xFF6F4E37).withOpacity(0.2),
+              color: const Color(0xFF6F4E37).withValues(alpha:0.2),
               thickness: 1,
             ),
             const SizedBox(height: 12),

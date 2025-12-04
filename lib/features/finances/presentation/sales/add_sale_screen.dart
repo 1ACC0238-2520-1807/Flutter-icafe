@@ -451,7 +451,7 @@ class _ProductSelectionDialogState extends State<_ProductSelectionDialog> {
           children: [
             // Dropdown de productos
             DropdownButtonFormField<Product>(
-              value: _selectedProduct,
+              initialValue: _selectedProduct,
               decoration: InputDecoration(
                 labelText: 'Producto',
                 filled: true,

@@ -66,7 +66,7 @@ class ConfirmationDialog extends StatelessWidget {
                     onPressed: isConfirmEnabled ? onConfirm : null,
                     style: ElevatedButton.styleFrom(
                       // Usamos un color semitransparente para dar contraste si el fondo es oscuro/colorido
-                      backgroundColor: Colors.black.withOpacity(0.2),
+                      backgroundColor: Colors.black.withValues(alpha:0.2),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

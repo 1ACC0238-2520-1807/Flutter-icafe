@@ -109,39 +109,6 @@ class _DashboardWrapperState extends State<DashboardWrapper>
     }
   }
 
-  Widget _buildPlaceholderScreen(String title) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F3F0),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF5D4037),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-          ),
-          child: AppBar(
-            title: Text(title),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-        ),
-      ),
-      body: Center(
-        child: Text(
-          'Próximamente: $title',
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF6F4E37),
-          ),
-        ),
-      ),
-    );
-  }
 
   void _onNavigationItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -195,7 +162,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, -2),
                     ),
@@ -216,7 +183,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                               opacity: isSelected ? 0 : 1,
                               child: Icon(
                                 items[index]['icon'] as IconData,
-                                color: Colors.white.withOpacity(0.6),
+                                color: Colors.white.withValues(alpha: 0.6),
                                 size: 24,
                               ),
                             ),
@@ -225,7 +192,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                               Text(
                                 items[index]['label'] as String,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
+                                  color: Colors.white.withValues(alpha:0.6),
                                   fontSize: 10,
                                 ),
                               ),
@@ -256,7 +223,7 @@ class _DashboardWrapperState extends State<DashboardWrapper>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3 * animationValue),
+                          color: Colors.black.withValues(alpha:0.3 * animationValue),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

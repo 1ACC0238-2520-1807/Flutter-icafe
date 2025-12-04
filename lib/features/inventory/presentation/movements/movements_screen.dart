@@ -26,6 +26,10 @@ class _MovementsScreenState extends State<MovementsScreen> {
   bool _isGeneratingPdf = false;
   String? _error;
   String _selectedFilter = 'TODOS'; // TODOS, ENTRADA, SALIDA
+  
+  // Filtros de fecha
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
@@ -60,6 +64,44 @@ class _MovementsScreenState extends State<MovementsScreen> {
     _loadData();
   }
 
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _startDate != null && _endDate != null
+          ? DateTimeRange(start: _startDate!, end: _endDate!)
+          : null,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF8B7355),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF6F4E37),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+      });
+    }
+  }
+
+  void _clearDateFilter() {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+    });
+  }
+
   Future<void> _generateAndOpenPdf() async {
     if (_movements.isEmpty) return;
 
@@ -73,6 +115,8 @@ class _MovementsScreenState extends State<MovementsScreen> {
         movements: filteredMovements,
         supplyItemsMap: _supplyItemsMap,
         filterType: _selectedFilter,
+        startDate: _startDate,
+        endDate: _endDate,
       );
       
       await MovementsPdfService.openPdf(file);
@@ -103,10 +147,24 @@ class _MovementsScreenState extends State<MovementsScreen> {
   }
 
   List<StockMovement> _filterMovements(List<StockMovement> movements) {
-    if (_selectedFilter == 'TODOS') {
-      return movements;
+    var filtered = movements;
+    
+    // Filtrar por tipo
+    if (_selectedFilter != 'TODOS') {
+      filtered = filtered.where((m) => m.type.toUpperCase() == _selectedFilter).toList();
     }
-    return movements.where((m) => m.type.toUpperCase() == _selectedFilter).toList();
+    
+    // Filtrar por fecha
+    if (_startDate != null && _endDate != null) {
+      final start = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+      final end = DateTime(_endDate!.year, _endDate!.month, _endDate!.day, 23, 59, 59);
+      filtered = filtered.where((m) => 
+        m.movementDate.isAfter(start.subtract(const Duration(seconds: 1))) && 
+        m.movementDate.isBefore(end.add(const Duration(seconds: 1)))
+      ).toList();
+    }
+    
+    return filtered;
   }
 
   @override
@@ -203,7 +261,7 @@ class _MovementsScreenState extends State<MovementsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // Filtros
+          // Filtros de tipo
           Row(
             children: [
               _buildFilterChip('TODOS', 'Todos'),
@@ -213,8 +271,83 @@ class _MovementsScreenState extends State<MovementsScreen> {
               _buildFilterChip('SALIDA', 'Salidas'),
             ],
           ),
+          const SizedBox(height: 12),
+          // Filtro de fechas
+          _buildDateFilterRow(),
         ],
       ),
+    );
+  }
+
+  Widget _buildDateFilterRow() {
+    final hasDateFilter = _startDate != null && _endDate != null;
+    
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: _selectDateRange,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: hasDateFilter ? const Color(0xFF8B7355).withValues(alpha: 0.1) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: hasDateFilter 
+                      ? const Color(0xFF8B7355) 
+                      : const Color(0xFF8B7355).withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.date_range,
+                    size: 18,
+                    color: hasDateFilter 
+                        ? const Color(0xFF8B7355) 
+                        : const Color(0xFF8B7355).withValues(alpha: 0.5),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      hasDateFilter
+                          ? '${_formatDate(_startDate!)} - ${_formatDate(_endDate!)}'
+                          : 'Filtrar por fechas',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: hasDateFilter ? FontWeight.w600 : FontWeight.w500,
+                        color: hasDateFilter 
+                            ? const Color(0xFF6F4E37) 
+                            : const Color(0xFF8B7355).withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (hasDateFilter) ...[
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _clearDateFilter,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.close,
+                size: 18,
+                color: Color(0xFFEF4444),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -449,7 +582,6 @@ class _MovementsScreenState extends State<MovementsScreen> {
 
   String _formatUnit(String? unit) {
     if (unit == null || unit.isEmpty) return '';
-    // Convertir unidades de mayúsculas a formato legible
     switch (unit.toUpperCase()) {
       case 'GRAMOS':
         return 'g';
@@ -555,6 +687,16 @@ class _MovementsScreenState extends State<MovementsScreen> {
   }
 
   Widget _buildEmptyFilterState() {
+    final hasDateFilter = _startDate != null && _endDate != null;
+    String message = 'No hay movimientos';
+    
+    if (_selectedFilter != 'TODOS') {
+      message = 'No hay ${_selectedFilter.toLowerCase()}s';
+    }
+    if (hasDateFilter) {
+      message += ' en el rango de fechas seleccionado';
+    }
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -567,9 +709,9 @@ class _MovementsScreenState extends State<MovementsScreen> {
               color: const Color(0xFF8B7355).withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Sin ${_selectedFilter.toLowerCase()}s',
-              style: const TextStyle(
+            const Text(
+              'Sin resultados',
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF6F4E37),
@@ -577,13 +719,24 @@ class _MovementsScreenState extends State<MovementsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'No hay movimientos de tipo ${_selectedFilter.toLowerCase()}',
+              message,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black.withValues(alpha: 0.5),
               ),
             ),
+            if (hasDateFilter) ...[
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _clearDateFilter,
+                icon: const Icon(Icons.clear, size: 18),
+                label: const Text('Limpiar filtro de fechas'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF8B7355),
+                ),
+              ),
+            ],
           ],
         ),
       ),

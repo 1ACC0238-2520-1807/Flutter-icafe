@@ -207,7 +207,7 @@ class _AddPurchaseOrderScreenState extends State<AddPurchaseOrderScreen> {
                       ],
                     ),
                     child: DropdownButtonFormField<Proveedor>(
-                      value: _selectedProveedor,
+                      initialValue: _selectedProveedor,
                       decoration: InputDecoration(
                         hintText: 'Seleccionar Proveedor',
                         border: OutlineInputBorder(
@@ -264,7 +264,7 @@ class _AddPurchaseOrderScreenState extends State<AddPurchaseOrderScreen> {
                       ],
                     ),
                     child: DropdownButtonFormField<SupplyItemResource>(
-                      value: _selectedSupplyItem,
+                      initialValue: _selectedSupplyItem,
                       decoration: InputDecoration(
                         hintText: 'Seleccionar Insumo',
                         border: OutlineInputBorder(

@@ -125,7 +125,7 @@ class _AddEditContentState extends State<_AddEditContent> {
                   child: DropdownButtonFormField<SupplyItemResource>(
                     isExpanded: true,
                     hint: const Text("Insumo"),
-                    value: _selectedSupplyItem,
+                    initialValue: _selectedSupplyItem,
                     items: provider.availableSupplyItems.map((item) {
                       return DropdownMenuItem(value: item, child: Text(item.name, overflow: TextOverflow.ellipsis));
                     }).toList(),
