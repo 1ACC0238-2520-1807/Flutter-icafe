@@ -163,7 +163,11 @@ class _AddEditContentState extends State<_AddEditContent> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF556B2F)),
                 onPressed: () async {
-                  final success = await provider.saveProduct();
+                  final success = await provider.saveProduct(
+                    productName: _nameCtrl.text,
+                    productCostPrice: _costCtrl.text,
+                    productProfitMargin: _profitCtrl.text,
+                  );
                   if (success && mounted) Navigator.pop(context);
                 },
                 child: const Text("Guardar Producto", style: TextStyle(color: Colors.white, fontSize: 18)),

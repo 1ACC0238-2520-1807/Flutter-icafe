@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/models/product_models.dart';
 import '../data/network/product_service.dart';
 import '../../inventory/data/models/inventory_models.dart';
+import '../../inventory/data/network/inventory_service.dart';
 
 class ProductListProvider extends ChangeNotifier {
   final ProductService _service;
@@ -35,14 +36,18 @@ class ProductListProvider extends ChangeNotifier {
 
 class ProductDetailProvider extends ChangeNotifier {
   final ProductService _service;
+  final InventoryService? _inventoryService;
   final int productId;
 
   bool isLoading = false;
   String? errorMessage;
   ProductResource? product;
   bool actionSuccess = false;
+  
+  /// Mapa de ingredientId -> SupplyItemResource para mostrar nombre y unidad
+  Map<int, SupplyItemResource> ingredientDetails = {};
 
-  ProductDetailProvider(this._service, this.productId) {
+  ProductDetailProvider(this._service, this.productId, [this._inventoryService]) {
     loadProductDetails();
   }
 
@@ -51,11 +56,52 @@ class ProductDetailProvider extends ChangeNotifier {
     notifyListeners();
     try {
       product = await _service.getProductById(productId);
+      
+      // Cargar detalles de cada ingrediente
+      if (product != null && _inventoryService != null) {
+        for (var ingredient in product!.ingredients) {
+          try {
+            final supplyItem = await _inventoryService.getSupplyItemById(ingredient.ingredientId);
+            ingredientDetails[ingredient.ingredientId] = supplyItem;
+          } catch (e) {
+            // Si falla, simplemente no tendremos el detalle de ese ingrediente
+            debugPrint('Error cargando ingrediente ${ingredient.ingredientId}: $e');
+          }
+        }
+      }
     } catch (e) {
       errorMessage = e.toString();
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+  
+  /// Obtiene el nombre del ingrediente por su ID
+  String getIngredientName(int ingredientId) {
+    return ingredientDetails[ingredientId]?.name ?? 'Ingrediente #$ingredientId';
+  }
+  
+  /// Obtiene la unidad del ingrediente por su ID
+  String getIngredientUnit(int ingredientId) {
+    final unit = ingredientDetails[ingredientId]?.unit ?? '';
+    return _formatUnitShort(unit);
+  }
+  
+  String _formatUnitShort(String unit) {
+    switch (unit.toUpperCase()) {
+      case 'GRAMOS':
+        return 'g';
+      case 'KILOGRAMOS':
+        return 'kg';
+      case 'MILILITROS':
+        return 'ml';
+      case 'LITROS':
+        return 'L';
+      case 'UNIDADES':
+        return 'uds';
+      default:
+        return unit.isNotEmpty ? unit.toLowerCase() : 'u';
     }
   }
 
@@ -126,17 +172,22 @@ class ProductFormProvider extends ChangeNotifier {
       if (productId != null) {
         final product = await _service.getProductById(productId!);
         name = product.name;
-        costPrice = product.costPrice.toString();
-        profitMargin = product.profitMargin.toString();
+        // Formatear números: si es entero mostrar sin decimales
+        costPrice = product.costPrice == product.costPrice.toInt() 
+            ? product.costPrice.toInt().toString() 
+            : product.costPrice.toString();
+        profitMargin = product.profitMargin == product.profitMargin.toInt() 
+            ? product.profitMargin.toInt().toString() 
+            : product.profitMargin.toString();
 
         selectedIngredients = product.ingredients.map((ing) {
           final supplyItem = availableSupplyItems.firstWhere(
-                  (s) => s.id == ing.supplyItemId,
-              orElse: () => SupplyItemResource(id: ing.supplyItemId, providerId: 0, branchId: 0, name: ing.name ?? "Desconocido", unit: ing.unit ?? "u", unitPrice: 0, stock: 0, buyDate: "", expiredDate: null)
+                  (s) => s.id == ing.ingredientId,
+              orElse: () => SupplyItemResource(id: ing.ingredientId, providerId: 0, branchId: 0, name: ing.name ?? "Desconocido", unit: ing.unit ?? "u", unitPrice: 0, stock: 0, buyDate: "", expiredDate: null)
           );
 
           return ProductIngredientFormModel(
-              supplyItemId: ing.supplyItemId,
+              supplyItemId: ing.ingredientId,
               name: supplyItem.name,
               unit: supplyItem.unit,
               quantity: ing.quantity.toString()
@@ -173,11 +224,24 @@ class ProductFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> saveProduct() async {
-    final cost = double.tryParse(costPrice);
-    final margin = double.tryParse(profitMargin);
+  Future<bool> saveProduct({
+    required String productName,
+    required String productCostPrice,
+    required String productProfitMargin,
+  }) async {
+    debugPrint('=== SAVE PRODUCT ===');
+    debugPrint('productName: $productName');
+    debugPrint('productCostPrice: $productCostPrice');
+    debugPrint('productProfitMargin: $productProfitMargin');
+    debugPrint('productId: $productId');
+    
+    final cost = double.tryParse(productCostPrice);
+    final margin = double.tryParse(productProfitMargin);
+    
+    debugPrint('parsed cost: $cost');
+    debugPrint('parsed margin: $margin');
 
-    if (name.isEmpty || cost == null || margin == null || selectedIngredients.isEmpty) {
+    if (productName.isEmpty || cost == null || margin == null || selectedIngredients.isEmpty) {
       errorMessage = "Completa todos los campos y añade al menos un ingrediente.";
       notifyListeners();
       return false;
@@ -191,11 +255,15 @@ class ProductFormProvider extends ChangeNotifier {
 
       // 1. Guardar o Actualizar el Producto base
       if (productId == null) {
-        final request = CreateProductRequest(branchId: branchId, name: name, costPrice: cost, profitMargin: margin);
+        debugPrint('CREATING new product');
+        final request = CreateProductRequest(branchId: branchId, name: productName, costPrice: cost, profitMargin: margin);
+        debugPrint('CreateProductRequest: ${request.toJson()}');
         final newProduct = await _service.createProduct(request);
         savedProductId = newProduct.id;
       } else {
-        final request = UpdateProductRequest(name: name, costPrice: cost, profitMargin: margin);
+        debugPrint('UPDATING existing product $productId');
+        final request = UpdateProductRequest(name: productName, costPrice: cost, profitMargin: margin);
+        debugPrint('UpdateProductRequest: ${request.toJson()}');
         await _service.updateProduct(productId!, request);
         savedProductId = productId!;
       }
@@ -203,11 +271,20 @@ class ProductFormProvider extends ChangeNotifier {
       for (var ing in selectedIngredients) {
         try {
           if (productId != null) {
-            try { await _service.removeIngredientFromProduct(savedProductId, ing.supplyItemId); } catch (_) {}
+            // Intentar eliminar el ingrediente primero (puede no existir)
+            try { 
+              debugPrint('Removing ingredient ${ing.supplyItemId} from product $savedProductId');
+              await _service.removeIngredientFromProduct(savedProductId, ing.supplyItemId); 
+            } catch (e) {
+              debugPrint('Remove ingredient failed (may not exist): $e');
+            }
           }
+          debugPrint('Adding ingredient ${ing.supplyItemId} with qty ${ing.quantity} to product $savedProductId');
           await _service.addIngredientToProduct(savedProductId, AddIngredientRequest(supplyItemId: ing.supplyItemId, quantity: double.parse(ing.quantity)));
+          debugPrint('Ingredient added successfully');
         } catch (e) {
-          // Ignorar o loguear
+          debugPrint('Error with ingredient ${ing.supplyItemId}: $e');
+          // Continuar con el siguiente ingrediente
         }
       }
 

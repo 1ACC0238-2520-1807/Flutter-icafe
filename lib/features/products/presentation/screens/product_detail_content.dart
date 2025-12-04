@@ -4,18 +4,23 @@ import '../../data/models/product_models.dart';
 import '../../providers/product_providers.dart';
 import '../../data/network/product_service.dart';
 import '../../../inventory/data/network/inventory_service.dart';
-import 'add_edit_product_screen.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+/// Widget de contenido para mostrar detalles del producto (sin Scaffold propio)
+/// Se usa dentro de InventoryScreen para mantener el bottom nav bar
+class ProductDetailContent extends StatelessWidget {
   final String portfolioId;
   final String selectedSedeId;
   final int productId;
+  final VoidCallback onEdit;
+  final VoidCallback onDeleted;
 
-  const ProductDetailScreen({
+  const ProductDetailContent({
     super.key,
     required this.portfolioId,
     required this.selectedSedeId,
     required this.productId,
+    required this.onEdit,
+    required this.onDeleted,
   });
 
   @override
@@ -26,21 +31,27 @@ class ProductDetailScreen extends StatelessWidget {
         productId,
         Provider.of<InventoryService>(context, listen: false),
       ),
-      child: _ProductDetailContent(
+      child: _ProductDetailBody(
         portfolioId: portfolioId,
         selectedSedeId: selectedSedeId,
+        onEdit: onEdit,
+        onDeleted: onDeleted,
       ),
     );
   }
 }
 
-class _ProductDetailContent extends StatelessWidget {
+class _ProductDetailBody extends StatelessWidget {
   final String portfolioId;
   final String selectedSedeId;
+  final VoidCallback onEdit;
+  final VoidCallback onDeleted;
 
-  const _ProductDetailContent({
+  const _ProductDetailBody({
     required this.portfolioId,
     required this.selectedSedeId,
+    required this.onEdit,
+    required this.onDeleted,
   });
 
   @override
@@ -48,111 +59,63 @@ class _ProductDetailContent extends StatelessWidget {
     final provider = Provider.of<ProductDetailProvider>(context);
     final product = provider.product;
 
-    const lightPeach = Color(0xFFF5E6D3);
-
     if (provider.isLoading) {
-      return Scaffold(
-        backgroundColor: lightPeach,
-        appBar: _buildAppBar(context, 'Cargando...'),
-        body: const Center(
-          child: CircularProgressIndicator(color: Color(0xFF8B7355)),
-        ),
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF8B7355)),
       );
     }
 
     if (product == null) {
-      return Scaffold(
-        backgroundColor: lightPeach,
-        appBar: _buildAppBar(context, 'Error'),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: const Color(0xFF8B7355).withValues(alpha: 0.5),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: const Color(0xFF8B7355).withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Error al cargar el producto',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6F4E37),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Error al cargar el producto',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF6F4E37),
-                ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              provider.errorMessage ?? 'Error desconocido',
+              style: TextStyle(
+                color: Colors.black.withValues(alpha: 0.5),
               ),
-              const SizedBox(height: 8),
-              Text(
-                provider.errorMessage ?? 'Error desconocido',
-                style: TextStyle(
-                  color: Colors.black.withValues(alpha: 0.5),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
 
     final isActive = product.status == ProductStatus.ACTIVE;
 
-    return Scaffold(
-      backgroundColor: lightPeach,
-      appBar: _buildAppBar(context, product.name),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header con información principal
-            _buildProductHeader(product, isActive),
-            
-            // Información de precios
-            _buildPriceSection(product),
-            
-            // Sección de ingredientes
-            _buildIngredientsSection(provider, product),
-            
-            // Acciones
-            _buildActionsSection(context, provider, product, isActive),
-            
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context, String title) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(70),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF5D4037),
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
-        ),
-        child: AppBar(
-          leading: Container(
-            margin: const EdgeInsets.all(8),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new),
-              onPressed: () => Navigator.pop(context),
-              color: Colors.white,
-            ),
-          ),
-          title: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header con información principal
+          _buildProductHeader(product, isActive),
+          
+          // Información de precios
+          _buildPriceSection(product),
+          
+          // Sección de ingredientes
+          _buildIngredientsSection(provider, product),
+          
+          // Acciones
+          _buildActionsSection(context, provider, product, isActive),
+          
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }
@@ -535,18 +498,7 @@ class _ProductDetailContent extends StatelessWidget {
             icon: Icons.edit_outlined,
             label: 'Editar Producto',
             color: const Color(0xFF8B7355),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddEditProductScreen(
-                    portfolioId: portfolioId,
-                    selectedSedeId: selectedSedeId,
-                    productId: product.id,
-                  ),
-                ),
-              ).then((_) => provider.loadProductDetails());
-            },
+            onTap: onEdit,
           ),
           const SizedBox(height: 10),
           // Archivar/Activar
@@ -556,16 +508,6 @@ class _ProductDetailContent extends StatelessWidget {
             color: isActive ? Colors.orange : const Color(0xFF10B981),
             onTap: () async {
               await provider.toggleArchiveStatus();
-              if (provider.actionSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      isActive ? 'Producto archivado' : 'Producto activado',
-                    ),
-                    backgroundColor: const Color(0xFF8B7355),
-                  ),
-                );
-              }
             },
           ),
           const SizedBox(height: 10),
@@ -617,8 +559,8 @@ class _ProductDetailContent extends StatelessWidget {
 
               if (confirm == true) {
                 final success = await provider.deleteProduct();
-                if (success && context.mounted) {
-                  Navigator.pop(context);
+                if (success) {
+                  onDeleted();
                 }
               }
             },

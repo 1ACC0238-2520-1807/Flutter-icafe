@@ -2,24 +2,34 @@
 enum ProductStatus { ACTIVE, ARCHIVED }
 
 class ProductIngredientResource {
-  final int supplyItemId;
+  final int ingredientId;
   final String? name;
   final String? unit;
   final double quantity;
 
   ProductIngredientResource({
-    required this.supplyItemId,
+    required this.ingredientId,
     this.name,
     this.unit,
     required this.quantity,
   });
 
+  /// Crea una copia con nombre y unidad actualizados
+  ProductIngredientResource copyWith({String? name, String? unit}) {
+    return ProductIngredientResource(
+      ingredientId: ingredientId,
+      name: name ?? this.name,
+      unit: unit ?? this.unit,
+      quantity: quantity,
+    );
+  }
+
   factory ProductIngredientResource.fromJson(Map<String, dynamic> json) {
     return ProductIngredientResource(
-      supplyItemId: json['supplyItemId'],
+      ingredientId: json['ingredientId'] ?? json['supplyItemId'] ?? 0,
       name: json['name'],
       unit: json['unit'],
-      quantity: (json['quantity'] as num).toDouble(),
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }
@@ -47,19 +57,21 @@ class ProductResource {
 
   factory ProductResource.fromJson(Map<String, dynamic> json) {
     return ProductResource(
-      id: json['id'],
-      branchId: json['branchId'],
-      name: json['name'],
-      costPrice: (json['costPrice'] as num).toDouble(),
-      salePrice: (json['salePrice'] as num).toDouble(),
-      profitMargin: (json['profitMargin'] as num).toDouble(),
+      id: json['id'] ?? 0,
+      branchId: json['branchId'] ?? 0,
+      name: json['name'] ?? '',
+      costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0.0,
+      salePrice: (json['salePrice'] as num?)?.toDouble() ?? 0.0,
+      profitMargin: (json['profitMargin'] as num?)?.toDouble() ?? 0.0,
       status: ProductStatus.values.firstWhere(
               (e) => e.toString().split('.').last == json['status'],
           orElse: () => ProductStatus.ACTIVE
       ),
-      ingredients: (json['ingredients'] as List)
-          .map((i) => ProductIngredientResource.fromJson(i))
-          .toList(),
+      ingredients: json['ingredients'] != null 
+          ? (json['ingredients'] as List)
+              .map((i) => ProductIngredientResource.fromJson(i))
+              .toList()
+          : [],
     );
   }
 }

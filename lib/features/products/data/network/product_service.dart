@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../inventory/data/models/inventory_models.dart';
 import '../models/product_models.dart';
 
@@ -23,8 +24,31 @@ class ProductService {
   }
 
   Future<ProductResource> updateProduct(int productId, UpdateProductRequest request) async {
-    final response = await _dio.put('/api/v1/products/$productId', data: request.toJson());
-    return ProductResource.fromJson(response.data);
+    final url = '/api/v1/products/$productId';
+    debugPrint('UPDATE PRODUCT - URL: $url');
+    debugPrint('UPDATE PRODUCT - Full URL: ${_dio.options.baseUrl}$url');
+    debugPrint('UPDATE PRODUCT - Body: ${request.toJson()}');
+    try {
+      final response = await _dio.put(
+        url, 
+        data: request.toJson(),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+          },
+        ),
+      );
+      debugPrint('UPDATE PRODUCT - Response: ${response.data}');
+      return ProductResource.fromJson(response.data);
+    } catch (e) {
+      debugPrint('UPDATE PRODUCT - Error details: $e');
+      if (e is DioException) {
+        debugPrint('UPDATE PRODUCT - Response data: ${e.response?.data}');
+        debugPrint('UPDATE PRODUCT - Request headers: ${e.requestOptions.headers}');
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteProduct(int productId) async {

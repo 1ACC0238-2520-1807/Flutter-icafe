@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "770959911528",
+    "project_id": "com-example-flutter-icafe",
+    "storage_bucket": "com-example-flutter-icafe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770959911528:android:060dd3e62d2273850d29dd",
+        "android_client_info": {
+          "package_name": "com.example.icafe_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc58QQwhgNWDwncK48b3DmZYBlG6iM61w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

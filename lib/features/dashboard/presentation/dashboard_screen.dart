@@ -108,8 +108,8 @@ class _DashboardScreenState extends State<DashboardScreen>
         );
       case 2:
         return InventoryScreen(
-          portfolioId: '', 
-          selectedSedeId: '',
+          portfolioId: '1', 
+          selectedSedeId: widget.branchId.toString(),
         );
       case 3:
         return FinancesScreen(

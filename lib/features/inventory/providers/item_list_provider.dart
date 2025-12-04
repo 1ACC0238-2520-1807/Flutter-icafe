@@ -22,20 +22,20 @@ class ItemListProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('📦 Cargando insumos para branchId: $branchId');
       final baseItems = await _service.getSupplyItemsByBranch(branchId);
+      debugPrint('📦 Insumos obtenidos: ${baseItems.length}');
 
-      final itemsWithStock = await Future.wait(baseItems.map((item) async {
-        try {
-          final stock = await _service.getCurrentStock(branchId, item.id);
-          return SupplyItemWithCurrentStock(item: item, currentStock: stock);
-        } catch (e) {
-          return SupplyItemWithCurrentStock(item: item, currentStock: 0.0);
-        }
-      }));
+      // Usar el stock que ya viene en el modelo en lugar de hacer otra llamada
+      final itemsWithStock = baseItems.map((item) {
+        return SupplyItemWithCurrentStock(item: item, currentStock: item.stock);
+      }).toList();
 
       items = itemsWithStock;
       status = ItemListStatus.success;
+      debugPrint('✅ Items cargados: ${items.length}');
     } catch (e) {
+      debugPrint('❌ Error cargando items: $e');
       errorMessage = e.toString();
       status = ItemListStatus.error;
     }

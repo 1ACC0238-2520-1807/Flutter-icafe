@@ -1,8 +1,25 @@
 import 'package:flutter/material.dart';
 import 'screens/item_list_screen.dart';
+import 'screens/add_edit_supply_item_content.dart';
+import 'screens/supply_item_detail_content.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
+import '../../products/presentation/screens/product_list_screen.dart';
+import '../../products/presentation/screens/product_detail_content.dart';
+import '../../products/presentation/screens/add_edit_product_content.dart';
 
-class InventoryScreen extends StatelessWidget {
+enum _InventoryViewState { 
+  menu, 
+  insumos, 
+  insumoDetalle,
+  insumoNuevo,
+  insumoEditar,
+  productos,
+  productoDetalle,
+  productoEditar,
+  productoNuevo,
+}
+
+class InventoryScreen extends StatefulWidget {
   final String portfolioId;
   final String selectedSedeId;
   final VoidCallback? onBack;
@@ -15,18 +32,261 @@ class InventoryScreen extends StatelessWidget {
   });
 
   @override
+  State<InventoryScreen> createState() => _InventoryScreenState();
+}
+
+class _InventoryScreenState extends State<InventoryScreen> {
+  _InventoryViewState _currentView = _InventoryViewState.menu;
+  int? _selectedProductId;
+  int? _selectedSupplyItemId;
+
+  String _getAppBarTitle() {
+    switch (_currentView) {
+      case _InventoryViewState.menu:
+        return 'Inventario';
+      case _InventoryViewState.insumos:
+        return 'Administrar Insumos';
+      case _InventoryViewState.insumoDetalle:
+        return 'Detalle del Insumo';
+      case _InventoryViewState.insumoNuevo:
+        return 'Nuevo Insumo';
+      case _InventoryViewState.insumoEditar:
+        return 'Editar Insumo';
+      case _InventoryViewState.productos:
+        return 'Administrar Productos';
+      case _InventoryViewState.productoDetalle:
+        return 'Detalle del Producto';
+      case _InventoryViewState.productoEditar:
+        return 'Editar Producto';
+      case _InventoryViewState.productoNuevo:
+        return 'Nuevo Producto';
+    }
+  }
+
+  void _handleBack() {
+    switch (_currentView) {
+      case _InventoryViewState.menu:
+        if (widget.onBack != null) {
+          widget.onBack!();
+        } else {
+          Navigator.pop(context);
+        }
+        break;
+      case _InventoryViewState.insumos:
+      case _InventoryViewState.productos:
+        setState(() {
+          _currentView = _InventoryViewState.menu;
+        });
+        break;
+      case _InventoryViewState.insumoNuevo:
+        setState(() {
+          _currentView = _InventoryViewState.insumos;
+          _selectedSupplyItemId = null;
+        });
+        break;
+      case _InventoryViewState.insumoDetalle:
+        setState(() {
+          _currentView = _InventoryViewState.insumos;
+          _selectedSupplyItemId = null;
+        });
+        break;
+      case _InventoryViewState.insumoEditar:
+        if (_selectedSupplyItemId != null) {
+          setState(() {
+            _currentView = _InventoryViewState.insumoDetalle;
+          });
+        } else {
+          setState(() {
+            _currentView = _InventoryViewState.insumos;
+          });
+        }
+        break;
+      case _InventoryViewState.productoDetalle:
+        setState(() {
+          _currentView = _InventoryViewState.productos;
+          _selectedProductId = null;
+        });
+        break;
+      case _InventoryViewState.productoEditar:
+      case _InventoryViewState.productoNuevo:
+        if (_selectedProductId != null) {
+          setState(() {
+            _currentView = _InventoryViewState.productoDetalle;
+          });
+        } else {
+          setState(() {
+            _currentView = _InventoryViewState.productos;
+          });
+        }
+        break;
+    }
+  }
+
+  void _onProductSelected(int productId) {
+    setState(() {
+      _selectedProductId = productId;
+      _currentView = _InventoryViewState.productoDetalle;
+    });
+  }
+
+  void _onEditProduct(int productId) {
+    setState(() {
+      _selectedProductId = productId;
+      _currentView = _InventoryViewState.productoEditar;
+    });
+  }
+
+  void _onAddProduct() {
+    setState(() {
+      _selectedProductId = null;
+      _currentView = _InventoryViewState.productoNuevo;
+    });
+  }
+
+  void _onProductSaved() {
+    if (_selectedProductId != null) {
+      setState(() {
+        _currentView = _InventoryViewState.productoDetalle;
+      });
+    } else {
+      setState(() {
+        _currentView = _InventoryViewState.productos;
+      });
+    }
+  }
+
+  void _onProductDeleted() {
+    setState(() {
+      _selectedProductId = null;
+      _currentView = _InventoryViewState.productos;
+    });
+  }
+
+  // Métodos para insumos
+  void _onSupplyItemSelected(int supplyItemId) {
+    setState(() {
+      _selectedSupplyItemId = supplyItemId;
+      _currentView = _InventoryViewState.insumoDetalle;
+    });
+  }
+
+  void _onEditSupplyItem(int supplyItemId) {
+    setState(() {
+      _selectedSupplyItemId = supplyItemId;
+      _currentView = _InventoryViewState.insumoEditar;
+    });
+  }
+
+  void _onAddSupplyItem() {
+    setState(() {
+      _selectedSupplyItemId = null;
+      _currentView = _InventoryViewState.insumoNuevo;
+    });
+  }
+
+  void _onSupplyItemSaved() {
+    if (_selectedSupplyItemId != null) {
+      setState(() {
+        _currentView = _InventoryViewState.insumoDetalle;
+      });
+    } else {
+      setState(() {
+        _currentView = _InventoryViewState.insumos;
+      });
+    }
+  }
+
+  void _onSupplyItemDeleted() {
+    setState(() {
+      _selectedSupplyItemId = null;
+      _currentView = _InventoryViewState.insumos;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const oliveGreen = Color(0xFF8B7355);
-    const darkBrown = Color(0xFF9E8B7E);
     const lightPeach = Color(0xFFF5E6D3);
 
     return Scaffold(
       backgroundColor: lightPeach,
       appBar: CustomAppBar(
-        title: 'Inventario',
-        onBackPressed: onBack ?? () => Navigator.pop(context),
+        title: _getAppBarTitle(),
+        onBackPressed: _handleBack,
       ),
-      body: SingleChildScrollView(
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    switch (_currentView) {
+      case _InventoryViewState.menu:
+        return _buildMenuContent();
+      case _InventoryViewState.insumos:
+        return ItemListScreen(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          onItemSelected: _onSupplyItemSelected,
+          onAddItem: _onAddSupplyItem,
+        );
+      case _InventoryViewState.insumoDetalle:
+        return SupplyItemDetailContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          supplyItemId: _selectedSupplyItemId!,
+          onEdit: () => _onEditSupplyItem(_selectedSupplyItemId!),
+          onDeleted: _onSupplyItemDeleted,
+        );
+      case _InventoryViewState.insumoNuevo:
+        return AddEditSupplyItemContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          supplyItemId: null,
+          onSaved: _onSupplyItemSaved,
+        );
+      case _InventoryViewState.insumoEditar:
+        return AddEditSupplyItemContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          supplyItemId: _selectedSupplyItemId,
+          onSaved: _onSupplyItemSaved,
+        );
+      case _InventoryViewState.productos:
+        return ProductListContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          onProductSelected: _onProductSelected,
+          onAddProduct: _onAddProduct,
+        );
+      case _InventoryViewState.productoDetalle:
+        return ProductDetailContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          productId: _selectedProductId!,
+          onEdit: () => _onEditProduct(_selectedProductId!),
+          onDeleted: _onProductDeleted,
+        );
+      case _InventoryViewState.productoEditar:
+        return AddEditProductContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          productId: _selectedProductId,
+          onSaved: _onProductSaved,
+        );
+      case _InventoryViewState.productoNuevo:
+        return AddEditProductContent(
+          portfolioId: widget.portfolioId,
+          selectedSedeId: widget.selectedSedeId,
+          productId: null,
+          onSaved: _onProductSaved,
+        );
+    }
+  }
+
+  Widget _buildMenuContent() {
+    const oliveGreen = Color(0xFF8B7355);
+    const darkBrown = Color(0xFF9E8B7E);
+
+    return SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,43 +319,27 @@ class InventoryScreen extends StatelessWidget {
             ),
             // Botón Administrar Insumos
             _buildInventoryButton(
-              context,
               icon: Icons.inventory_2,
               title: 'Administrar Insumos',
               description: 'Gestiona tus insumos y materias primas',
               backgroundColor: oliveGreen,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ItemListScreen(
-                      portfolioId: portfolioId,
-                      selectedSedeId: selectedSedeId,
-                    ),
-                  ),
-                );
-              },
+              onPressed: () => setState(() => _currentView = _InventoryViewState.insumos),
             ),
             const SizedBox(height: 20),
             // Botón Administrar Productos
             _buildInventoryButton(
-              context,
               icon: Icons.local_cafe,
               title: 'Administrar Productos',
               description: 'Gestiona los productos de tu cafetería',
               backgroundColor: darkBrown,
-              onPressed: () {
-                // TODO: Conectar ProductListScreen cuando la tengas lista
-              },
+              onPressed: () => setState(() => _currentView = _InventoryViewState.productos),
             ),
           ],
         ),
-      ),
     );
   }
 
-  Widget _buildInventoryButton(
-    BuildContext context, {
+  Widget _buildInventoryButton({
     required IconData icon,
     required String title,
     required String description,
