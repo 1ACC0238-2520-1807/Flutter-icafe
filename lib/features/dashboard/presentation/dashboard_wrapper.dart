@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../contacts/presentation/contacts_screen.dart';
-import '../../inventory/presentation/inventory_screen.dart';
+import '../../../../features/contacts/presentation/screens/contacts_landing_screen.dart';
+import '../../../../features/inventory/presentation/inventory_screen.dart';
 import 'dashboard_screen.dart';
 
 class DashboardWrapper extends StatefulWidget {
@@ -45,6 +45,9 @@ class _DashboardWrapperState extends State<DashboardWrapper>
   }
 
   Widget _buildCurrentScreen() {
+    // Usamos portfolioId fijo "1" como ejemplo, o lo derivas de tu lógica global
+    const String portfolioId = "1";
+
     switch (_selectedIndex) {
       case 0:
         return DashboardScreen(
@@ -52,17 +55,18 @@ class _DashboardWrapperState extends State<DashboardWrapper>
           sedeName: widget.sedeName,
         );
       case 1:
-        return ContactsScreen(
-          branchId: widget.branchId,
-          sedeName: widget.sedeName,
+      // CORRECCIÓN AQUÍ: Usamos ContactsLandingScreen
+        return ContactsLandingScreen(
+          portfolioId: portfolioId,
+          selectedSedeId: widget.branchId.toString(),
         );
       case 2:
         return InventoryScreen(
-          portfolioId: "1",
+          portfolioId: portfolioId,
           selectedSedeId: widget.branchId.toString(),
         );
       case 3:
-        return _buildPlaceholderScreen('Finanzas');
+        return _buildPlaceholderScreen('Finanzas'); // Aquí irá FinanceLandingScreen luego
       case 4:
         return _buildPlaceholderScreen('Movimiento');
       default:
