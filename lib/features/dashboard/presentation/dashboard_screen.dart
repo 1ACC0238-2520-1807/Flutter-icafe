@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../auth/data/secure_storage.dart';
 import '../../auth/presentation/login_screen.dart';
-import '../../contacts/presentation/contacts_screen.dart';
+import '../../contacts/presentation/contacts_container.dart';
 import '../../inventory/presentation/inventory_screen.dart';
+import '../../finances/presentation/finances_screen.dart';
 import '../data/services/dashboard_service.dart';
+import '../../../shared/widgets/custom_app_bar.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int branchId;
@@ -92,9 +94,15 @@ class _DashboardScreenState extends State<DashboardScreen>
       case 0:
         return _buildDashboardContent();
       case 1:
-        return ContactsScreen(
+        return ContactsContainer(
           branchId: widget.branchId,
-          sedeName: widget.sedeName,
+          selectedIndex: _selectedIndex,
+          onNavigationChanged: (index) {
+            setState(() => _selectedIndex = index);
+          },
+          onBack: () {
+            setState(() => _selectedIndex = 0);
+          },
         );
       case 2:
         return InventoryScreen(
@@ -102,7 +110,12 @@ class _DashboardScreenState extends State<DashboardScreen>
           sedeName: widget.sedeName,
         );
       case 3:
-        return _buildPlaceholderScreen('Finanzas');
+        return FinancesScreen(
+          branchId: widget.branchId,
+          onBack: () {
+            setState(() => _selectedIndex = 0);
+          },
+        );
       case 4:
         return _buildPlaceholderScreen('Movimiento');
       default:
@@ -112,31 +125,16 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Widget _buildDashboardContent() {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3F0),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF5D4037),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
+      backgroundColor: const Color(0xFFF5E6D3),
+      appBar: CustomAppBar(
+        title: 'Inicio',
+        onBackPressed: null,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _onLogout,
           ),
-          child: AppBar(
-            title: const Text('Inicio'),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: _onLogout,
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _dashboardDataFuture,
@@ -281,25 +279,12 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Widget _buildPlaceholderScreen(String title) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3F0),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF5D4037),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-          ),
-          child: AppBar(
-            title: Text(title),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-        ),
+      backgroundColor: const Color(0xFFF5E6D3),
+      appBar: CustomAppBar(
+        title: title,
+        onBackPressed: () {
+          setState(() => _selectedIndex = 0);
+        },
       ),
       body: Center(
         child: Text(
@@ -316,7 +301,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3F0),
+      backgroundColor: const Color(0xFFF5E6D3),
       body: _buildCurrentScreen(),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );

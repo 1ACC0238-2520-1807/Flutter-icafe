@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../contacts/presentation/contacts_screen.dart';
+import '../../contacts/presentation/pages/contactos_screen.dart';
 import '../../inventory/presentation/inventory_screen.dart';
 import 'dashboard_screen.dart';
 
@@ -52,9 +52,8 @@ class _DashboardWrapperState extends State<DashboardWrapper>
           sedeName: widget.sedeName,
         );
       case 1:
-        return ContactsScreen(
+        return ContactosScreen(
           branchId: widget.branchId,
-          sedeName: widget.sedeName,
         );
       case 2:
         return InventoryScreen(

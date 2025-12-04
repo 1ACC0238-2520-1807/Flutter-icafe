@@ -1,37 +1,35 @@
 import 'package:flutter/material.dart';
+import 'empleados_screen.dart';
+import 'proveedores_screen.dart';
+import '../../../../shared/widgets/custom_app_bar.dart';
 
-class InventoryScreen extends StatelessWidget {
+class ContactosScreen extends StatelessWidget {
   final int branchId;
-  final String sedeName;
-
-  const InventoryScreen({
-    super.key,
+  final VoidCallback? onEmpleadosPressed;
+  final VoidCallback? onProveedoresPressed;
+  final VoidCallback? onBack;
+  
+  const ContactosScreen({
+    super.key, 
     required this.branchId,
-    required this.sedeName,
+    this.onEmpleadosPressed,
+    this.onProveedoresPressed,
+    this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5E6D3),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF5D4037),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-          ),
-          child: AppBar(
-            title: const Text('Inventario'),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'Contactos',
+        onBackPressed: () {
+          if (onBack != null) {
+            onBack!();
+          } else {
+            Navigator.pop(context);
+          }
+        },
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -45,7 +43,7 @@ class InventoryScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Gestión de Alimentos',
+                    'Gestión de Contactos',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -54,7 +52,7 @@ class InventoryScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Administra tus insumos y productos',
+                    'Administra tus empleados y proveedores',
                     style: TextStyle(
                       fontSize: 14,
                       color: const Color(0xFF8B7355).withValues(alpha: 0.7),
@@ -64,27 +62,51 @@ class InventoryScreen extends StatelessWidget {
                 ],
               ),
             ),
-            // Botón Administrar Insumos
-            _buildInventoryButton(
+            // Botón Administrar Empleados
+            _buildContactButton(
               context,
-              icon: Icons.shopping_cart,
-              title: 'Administrar Insumos',
-              description: 'Gestiona tus insumos y materias primas',
+              icon: Icons.people,
+              title: 'Administrar Empleados',
+              description: 'Gestiona tus empleados',
               backgroundColor: const Color(0xFF8B7355),
               onPressed: () {
-                // TODO: Navegar a pantalla de administración de insumos
+                if (onEmpleadosPressed != null) {
+                  onEmpleadosPressed!();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EmpleadosScreen(
+                        branchId: branchId,
+                        onBack: onBack,
+                      ),
+                    ),
+                  );
+                }
               },
             ),
             const SizedBox(height: 20),
-            // Botón Administrar Productos
-            _buildInventoryButton(
+            // Botón Administrar Proveedores
+            _buildContactButton(
               context,
-              icon: Icons.local_cafe,
-              title: 'Administrar Productos',
-              description: 'Gestiona los productos de tu cafetería',
+              icon: Icons.local_shipping,
+              title: 'Administrar Proveedores',
+              description: 'Gestiona tus proveedores',
               backgroundColor: const Color(0xFF9E8B7E),
               onPressed: () {
-                // TODO: Navegar a pantalla de administración de productos
+                if (onProveedoresPressed != null) {
+                  onProveedoresPressed!();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProveedoresScreen(
+                        branchId: branchId,
+                        onBack: onBack,
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           ],
@@ -93,7 +115,7 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInventoryButton(
+  Widget _buildContactButton(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -105,6 +127,8 @@ class InventoryScreen extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
+        splashColor: Colors.black.withValues(alpha: 0.1),
+        highlightColor: Colors.black.withValues(alpha: 0.05),
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
@@ -172,3 +196,4 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 }
+
