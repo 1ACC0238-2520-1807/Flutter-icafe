@@ -22,6 +22,12 @@ dependencies:
   pdf: ^3.11.1
   path_provider: ^2.1.5
   open_file: ^3.5.9
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logoicafe.png"
 
 dev_dependencies:
   flutter_test:
