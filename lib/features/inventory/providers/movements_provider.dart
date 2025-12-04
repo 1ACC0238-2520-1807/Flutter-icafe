@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../data/models/inventory_models.dart';
 import '../data/network/inventory_service.dart';
 
@@ -42,6 +43,15 @@ class InventoryMovementsProvider extends ChangeNotifier {
         selectedMovement = null;
       }
 
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        errorMessage = "El servicio de movimientos no está disponible en este momento.";
+      } else if (e.response?.statusCode == 404) {
+        errorMessage = "No se encontró el endpoint de movimientos.";
+      } else {
+        errorMessage = "Error de conexión: ${e.message}";
+      }
+      movements = [];
     } catch (e) {
       errorMessage = "Error al cargar movimientos: $e";
       movements = [];

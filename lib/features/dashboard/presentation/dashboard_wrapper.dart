@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:icafe_flutter/features/finances/presentation/finances_screen.dart';
 import '../../contacts/presentation/pages/contactos_screen.dart';
 import '../../inventory/presentation/inventory_screen.dart';
+import '../../inventory/presentation/movements/movements_screen.dart';
 import 'dashboard_screen.dart';
 
 class DashboardWrapper extends StatefulWidget {
@@ -64,9 +66,41 @@ class _DashboardWrapperState extends State<DashboardWrapper>
           selectedSedeId: widget.branchId.toString(),
         );
       case 3:
-        return _buildPlaceholderScreen('Finanzas'); // Aquí irá FinanceLandingScreen luego
+        return FinancesScreen(
+          branchId: widget.branchId,
+        );
       case 4:
-        return _buildPlaceholderScreen('Movimiento');
+        return Scaffold(
+          backgroundColor: const Color(0xFFF5E6D3),
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(70),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF5D4037),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
+              child: AppBar(
+                title: const Text('Movimiento'),
+                centerTitle: true,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() => _selectedIndex = 0);
+                  },
+                ),
+              ),
+            ),
+          ),
+          body: MovementsScreen(
+            branchId: widget.branchId,
+          ),
+        );
       default:
         return DashboardScreen(
           branchId: widget.branchId,

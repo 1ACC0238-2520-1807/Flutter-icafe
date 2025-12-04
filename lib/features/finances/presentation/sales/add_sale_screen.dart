@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../shared/widgets/custom_app_bar.dart';
 import '../../domain/entities/product.dart';
 import '../../data/repositories/products_repository.dart';
 import '../../data/repositories/sales_repository.dart';
@@ -27,7 +26,7 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
   
   List<Product> _allProducts = [];
   List<Product> _availableProducts = [];
-  List<SaleItemData> _items = [];
+  final List<SaleItemData> _items = [];
   bool _isLoading = true;
   bool _isSaving = false;
 

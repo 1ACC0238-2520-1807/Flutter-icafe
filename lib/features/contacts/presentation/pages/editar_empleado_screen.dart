@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../data/repositories/empleado_repository.dart';
 import '../../domain/entities/empleado.dart';
-import '../../../../shared/widgets/custom_app_bar.dart';
 
 class EditarEmpleadoScreen extends StatefulWidget {
   final Empleado empleado;
   final int portfolioId;
   final VoidCallback? onBack;
+  final VoidCallback? onEmpleadoEditado;
 
   const EditarEmpleadoScreen({
     super.key,
     required this.empleado,
     required this.portfolioId,
     this.onBack,
+    this.onEmpleadoEditado,
   });
 
   @override
@@ -114,21 +115,10 @@ class _EditarEmpleadoScreenState extends State<EditarEmpleadoScreen> {
                                 
                                 if (!mounted) return;
                                 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Cambios guardados correctamente'),
-                                  ),
-                                );
-                                
-                                // Usar post frame callback para navegar de forma segura
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (mounted && Navigator.canPop(context)) {
-                                    Navigator.pop(context); // Cerrar pantalla de editar
-                                  }
-                                  if (mounted && Navigator.canPop(context)) {
-                                    Navigator.pop(context); // Cerrar pantalla "Ver más" y regresar a lista
-                                  }
-                                });
+                                // Usar callback para regresar a la lista
+                                if (widget.onEmpleadoEditado != null) {
+                                  widget.onEmpleadoEditado!();
+                                }
                               } catch (e) {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -203,13 +193,9 @@ class _EditarEmpleadoScreenState extends State<EditarEmpleadoScreen> {
     const lightPeach = Color(0xFFF5E6D3);
     const darkBrown = Color(0xFF5D4037);
 
-    return Scaffold(
-      backgroundColor: lightPeach,
-      appBar: CustomAppBar(
-        title: 'Editar Empleado',
-        onBackPressed: widget.onBack,
-      ),
-      body: Form(
+    return Container(
+      color: lightPeach,
+      child: Form(
         key: _formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

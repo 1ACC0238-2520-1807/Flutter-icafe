@@ -3,6 +3,7 @@ import '../../auth/data/secure_storage.dart';
 import '../../auth/presentation/login_screen.dart';
 import '../../contacts/presentation/contacts_container.dart';
 import '../../inventory/presentation/inventory_screen.dart';
+import '../../inventory/presentation/movements/movements_screen.dart';
 import '../../finances/presentation/finances_screen.dart';
 import '../data/services/dashboard_service.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
@@ -118,7 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           },
         );
       case 4:
-        return _buildPlaceholderScreen('Movimiento');
+        return _buildMovementsScreen();
       default:
         return _buildDashboardContent();
     }
@@ -278,23 +279,20 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  Widget _buildPlaceholderScreen(String title) {
+  Widget _buildMovementsScreen() {
     return Scaffold(
       backgroundColor: const Color(0xFFF5E6D3),
       appBar: CustomAppBar(
-        title: title,
+        title: 'Movimiento',
         onBackPressed: () {
           setState(() => _selectedIndex = 0);
         },
       ),
-      body: Center(
-        child: Text(
-          'Próximamente: $title',
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF6F4E37),
-          ),
-        ),
+      body: MovementsScreen(
+        branchId: widget.branchId,
+        onBack: () {
+          setState(() => _selectedIndex = 0);
+        },
       ),
     );
   }

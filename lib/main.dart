@@ -36,9 +36,9 @@ class ICafeApp extends StatelessWidget {
         Provider<Dio>(
           create: (_) {
             final dio = Dio(BaseOptions(
-              baseUrl: 'http://10.0.2.2:8080', // CAMBIA ESTO por tu IP real o URL de producción
-              connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 10),
+              baseUrl: 'http://upc-icafebackend-3sger0-aa823d-31-97-13-234.traefik.me',
+              connectTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -46,18 +46,18 @@ class ICafeApp extends StatelessWidget {
             ));
 
             // Interceptor para agregar el Token automáticamente a cada petición
-            dio.interceptors.add(InterceptorsWrapper(
+            dio.interceptors.add(QueuedInterceptorsWrapper(
               onRequest: (options, handler) async {
                 final token = await SecureStorage.readToken();
-                if (token != null) {
+                if (token != null && token.isNotEmpty) {
                   options.headers['Authorization'] = 'Bearer $token';
                 }
-                return handler.next(options);
+                handler.next(options);
               },
               onError: (DioException e, handler) {
                 // Aquí podrías manejar errores globales, como 401 Unauthorized (cerrar sesión)
                 print("Error de Dio: ${e.response?.statusCode} - ${e.message}");
-                return handler.next(e);
+                handler.next(e);
               },
             ));
 

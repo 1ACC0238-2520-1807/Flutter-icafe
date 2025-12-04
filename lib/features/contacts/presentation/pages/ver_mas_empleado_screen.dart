@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/empleado.dart';
-import 'editar_empleado_screen.dart';
 
 class VerMasEmpleadoScreen extends StatelessWidget {
   final Empleado empleado;
   final int portfolioId;
   final VoidCallback? onBack;
+  final VoidCallback? onEditar;
 
   const VerMasEmpleadoScreen({
     super.key,
     required this.empleado,
     required this.portfolioId,
     this.onBack,
+    this.onEditar,
   });
 
   @override
@@ -47,19 +48,9 @@ class VerMasEmpleadoScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: InkWell(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditarEmpleadoScreen(
-                        empleado: empleado,
-                        portfolioId: portfolioId,
-                        onBack: onBack,
-                      ),
-                    ),
-                  );
-                  if (result == true) {
-                    Navigator.pop(context); // Volver a la lista si se guardaron cambios
+                onTap: () {
+                  if (onEditar != null) {
+                    onEditar!();
                   }
                 },
                 borderRadius: BorderRadius.circular(16),

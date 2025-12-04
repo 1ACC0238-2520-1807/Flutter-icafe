@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/proveedor.dart';
-import 'editar_proveedor_screen.dart';
 
 class VerMasProveedorScreen extends StatelessWidget {
   final Proveedor proveedor;
   final int portfolioId;
   final VoidCallback? onBack;
+  final VoidCallback? onEditar;
 
   const VerMasProveedorScreen({
     super.key,
     required this.proveedor,
     required this.portfolioId,
     this.onBack,
+    this.onEditar,
   });
 
   @override
@@ -44,19 +45,9 @@ class VerMasProveedorScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: InkWell(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditarProveedorScreen(
-                        proveedor: proveedor,
-                        portfolioId: portfolioId,
-                        onBack: onBack,
-                      ),
-                    ),
-                  );
-                  if (result == true) {
-                    Navigator.pop(context); // Volver a la lista si se guardaron cambios
+                onTap: () {
+                  if (onEditar != null) {
+                    onEditar!();
                   }
                 },
                 borderRadius: BorderRadius.circular(16),

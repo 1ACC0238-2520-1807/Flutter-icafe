@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'agregar_empleado_screen.dart';
 import 'ver_mas_empleado_screen.dart';
+import 'editar_empleado_screen.dart';
 import '../../data/repositories/empleado_repository.dart';
 import '../../domain/entities/empleado.dart';
 import '../../../auth/data/secure_storage.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 
-enum _EmpleadosViewState { lista, agregar, verMas }
+enum _EmpleadosViewState { lista, agregar, verMas, editar }
 
 class EmpleadosScreen extends StatefulWidget {
   final int branchId;
@@ -100,11 +101,17 @@ class _EmpleadosScreenState extends State<EmpleadosScreen> {
         return 'Agregar Empleado';
       case _EmpleadosViewState.verMas:
         return 'Detalles del Empleado';
+      case _EmpleadosViewState.editar:
+        return 'Editar Empleado';
     }
   }
 
   void _handleBack() {
-    if (_currentView != _EmpleadosViewState.lista) {
+    if (_currentView == _EmpleadosViewState.editar) {
+      setState(() {
+        _currentView = _EmpleadosViewState.verMas;
+      });
+    } else if (_currentView != _EmpleadosViewState.lista) {
       setState(() {
         _currentView = _EmpleadosViewState.lista;
         _selectedEmpleado = null;
@@ -119,6 +126,20 @@ class _EmpleadosScreenState extends State<EmpleadosScreen> {
         Navigator.pop(context);
       }
     }
+  }
+
+  void _goToEditarEmpleado() {
+    setState(() {
+      _currentView = _EmpleadosViewState.editar;
+    });
+  }
+
+  void _onEmpleadoEditado() {
+    setState(() {
+      _currentView = _EmpleadosViewState.lista;
+      _selectedEmpleado = null;
+    });
+    _loadEmpleados();
   }
 
   Widget _buildView() {
@@ -140,6 +161,17 @@ class _EmpleadosScreenState extends State<EmpleadosScreen> {
           empleado: _selectedEmpleado!,
           portfolioId: _portfolioId!,
           onBack: null,
+          onEditar: _goToEditarEmpleado,
+        );
+      case _EmpleadosViewState.editar:
+        if (_selectedEmpleado == null || _portfolioId == null) {
+          return const SizedBox();
+        }
+        return EditarEmpleadoScreen(
+          empleado: _selectedEmpleado!,
+          portfolioId: _portfolioId!,
+          onBack: null,
+          onEmpleadoEditado: _onEmpleadoEditado,
         );
     }
   }

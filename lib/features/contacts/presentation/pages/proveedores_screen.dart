@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'agregar_proveedor_screen.dart';
 import 'ver_mas_proveedor_screen.dart';
+import 'editar_proveedor_screen.dart';
 import '../../data/repositories/proveedor_repository.dart';
 import '../../domain/entities/proveedor.dart';
 import '../../../auth/data/secure_storage.dart';
 import '../../../../shared/widgets/custom_app_bar.dart';
 
-enum _ProveedoresViewState { lista, agregar, verMas }
+enum _ProveedoresViewState { lista, agregar, verMas, editar }
 
 class ProveedoresScreen extends StatefulWidget {
   final int branchId;
@@ -100,11 +101,17 @@ class _ProveedoresScreenState extends State<ProveedoresScreen> {
         return 'Agregar Proveedor';
       case _ProveedoresViewState.verMas:
         return 'Detalles del Proveedor';
+      case _ProveedoresViewState.editar:
+        return 'Editar Proveedor';
     }
   }
 
   void _handleBack() {
-    if (_currentView != _ProveedoresViewState.lista) {
+    if (_currentView == _ProveedoresViewState.editar) {
+      setState(() {
+        _currentView = _ProveedoresViewState.verMas;
+      });
+    } else if (_currentView != _ProveedoresViewState.lista) {
       setState(() {
         _currentView = _ProveedoresViewState.lista;
         _selectedProveedor = null;
@@ -119,6 +126,20 @@ class _ProveedoresScreenState extends State<ProveedoresScreen> {
         Navigator.pop(context);
       }
     }
+  }
+
+  void _goToEditarProveedor() {
+    setState(() {
+      _currentView = _ProveedoresViewState.editar;
+    });
+  }
+
+  void _onProveedorEditado() {
+    setState(() {
+      _currentView = _ProveedoresViewState.lista;
+      _selectedProveedor = null;
+    });
+    _loadProveedores();
   }
 
   Widget _buildView() {
@@ -140,6 +161,17 @@ class _ProveedoresScreenState extends State<ProveedoresScreen> {
           proveedor: _selectedProveedor!,
           portfolioId: _portfolioId!,
           onBack: null,
+          onEditar: _goToEditarProveedor,
+        );
+      case _ProveedoresViewState.editar:
+        if (_selectedProveedor == null || _portfolioId == null) {
+          return const SizedBox();
+        }
+        return EditarProveedorScreen(
+          proveedor: _selectedProveedor!,
+          portfolioId: _portfolioId!,
+          onBack: null,
+          onProveedorEditado: _onProveedorEditado,
         );
     }
   }
