@@ -54,13 +54,6 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al cargar productos: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -70,12 +63,6 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
 
   void _addProduct() {
     if (_availableProducts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No hay más productos disponibles'),
-          backgroundColor: Colors.orange,
-        ),
-      );
       return;
     }
 
@@ -85,11 +72,11 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
         products: _availableProducts,
         onProductSelected: (product, quantity) {
           setState(() {
-            final subtotal = product.price * quantity;
+            final subtotal = product.salePrice * quantity;
             _items.add(SaleItemData(
               product: product,
               quantity: quantity,
-              unitPrice: product.price,
+              unitPrice: product.salePrice,
               subtotal: subtotal,
             ));
             _availableProducts.removeWhere((p) => p.id == product.id);
@@ -112,12 +99,6 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Debes añadir al menos un producto'),
-          backgroundColor: Colors.orange,
-        ),
-      );
       return;
     }
 
@@ -142,24 +123,9 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
 
       if (!mounted) return;
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Venta registrada exitosamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
       widget.onSaleAdded();
-      Navigator.pop(context);
     } catch (e) {
       setState(() => _isSaving = false);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al registrar venta: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -169,7 +135,6 @@ class _AddSaleScreenState extends State<AddSaleScreen> {
 
     return Scaffold(
       backgroundColor: lightPeach,
-      appBar: const CustomAppBar(title: 'Nueva Venta'),
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
@@ -501,7 +466,7 @@ class _ProductSelectionDialogState extends State<_ProductSelectionDialog> {
                 return DropdownMenuItem(
                   value: product,
                   child: Text(
-                    '${product.name} - S/. ${product.price.toStringAsFixed(2)}',
+                    '${product.name} - S/. ${product.salePrice.toStringAsFixed(2)}',
                     style: const TextStyle(fontSize: 14),
                   ),
                 );
@@ -537,23 +502,11 @@ class _ProductSelectionDialogState extends State<_ProductSelectionDialog> {
         ElevatedButton(
           onPressed: () {
             if (_selectedProduct == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Selecciona un producto'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
               return;
             }
 
             final quantity = int.tryParse(_quantityController.text);
             if (quantity == null || quantity <= 0) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Ingresa una cantidad válida'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
               return;
             }
 

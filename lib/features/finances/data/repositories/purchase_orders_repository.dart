@@ -36,4 +36,34 @@ class PurchaseOrdersRepository {
       throw Exception('Error de conexión: $e');
     }
   }
+
+  Future<PurchaseOrder> createPurchaseOrder(Map<String, dynamic> orderData) async {
+    try {
+      final token = await SecureStorage.readToken();
+      
+      if (token == null) {
+        throw Exception('Token no disponible. Por favor inicia sesión nuevamente.');
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiConstants.baseUrl}/api/v1/purchase-orders'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(orderData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        return PurchaseOrder.fromJson(jsonData);
+      } else if (response.statusCode == 401) {
+        throw Exception('No autorizado. Token inválido.');
+      } else {
+        throw Exception('Error al crear la orden de compra: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
+  }
 }

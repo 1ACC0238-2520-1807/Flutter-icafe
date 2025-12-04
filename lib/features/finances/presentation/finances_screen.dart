@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'sales/sales_screen.dart';
 import 'sales/add_sale_screen.dart';
+import 'sales/sale_detail_screen.dart';
 import 'purchase_orders/purchase_orders_screen.dart';
+import 'purchase_orders/add_purchase_order_screen.dart';
+import 'purchase_orders/purchase_order_detail_screen.dart';
 import '../../../shared/widgets/custom_app_bar.dart';
+import '../domain/entities/sale.dart';
+import '../domain/entities/purchase_order.dart';
+import '../../auth/data/secure_storage.dart';
 
-enum _FinancesViewState { lista, ventas, compras, agregarVenta }
+enum _FinancesViewState { lista, ventas, compras, agregarVenta, detalleVenta, agregarCompra, detalleCompra }
 
 class FinancesScreen extends StatefulWidget {
   final int branchId;
@@ -22,6 +28,22 @@ class FinancesScreen extends StatefulWidget {
 
 class _FinancesScreenState extends State<FinancesScreen> {
   _FinancesViewState _currentView = _FinancesViewState.lista;
+  Sale? _selectedSale;
+  PurchaseOrder? _selectedPurchaseOrder;
+  int? _portfolioId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPortfolioId();
+  }
+
+  Future<void> _loadPortfolioId() async {
+    final id = await SecureStorage.readUserId();
+    if (mounted && id != null) {
+      setState(() => _portfolioId = id);
+    }
+  }
 
   void _handleAddSale() {
     setState(() {
@@ -29,9 +51,35 @@ class _FinancesScreenState extends State<FinancesScreen> {
     });
   }
 
+  void _handleAddPurchaseOrder() {
+    setState(() {
+      _currentView = _FinancesViewState.agregarCompra;
+    });
+  }
+
   void _onSaleAdded() {
     setState(() {
       _currentView = _FinancesViewState.ventas;
+    });
+  }
+
+  void _onPurchaseOrderAdded() {
+    setState(() {
+      _currentView = _FinancesViewState.compras;
+    });
+  }
+
+  void _onSaleSelected(Sale sale) {
+    setState(() {
+      _selectedSale = sale;
+      _currentView = _FinancesViewState.detalleVenta;
+    });
+  }
+
+  void _onPurchaseOrderSelected(PurchaseOrder order) {
+    setState(() {
+      _selectedPurchaseOrder = order;
+      _currentView = _FinancesViewState.detalleCompra;
     });
   }
 
@@ -46,11 +94,13 @@ class _FinancesScreenState extends State<FinancesScreen> {
         onBackPressed: _handleBack,
       ),
       body: _buildView(),
-      floatingActionButton: _currentView == _FinancesViewState.ventas
+      floatingActionButton: (_currentView == _FinancesViewState.ventas || _currentView == _FinancesViewState.compras)
           ? Padding(
-              padding: const EdgeInsets.only(bottom: 60), // Arriba del nav bar
+              padding: const EdgeInsets.only(bottom: 60),
               child: FloatingActionButton(
-                onPressed: _handleAddSale,
+                onPressed: _currentView == _FinancesViewState.ventas 
+                    ? _handleAddSale 
+                    : _handleAddPurchaseOrder,
                 backgroundColor: const Color(0xFF8B7355),
                 child: const Icon(
                   Icons.add,
@@ -74,13 +124,27 @@ class _FinancesScreenState extends State<FinancesScreen> {
         return 'Administrar Compras';
       case _FinancesViewState.agregarVenta:
         return 'Nueva Venta';
+      case _FinancesViewState.detalleVenta:
+        return 'Detalle de Venta';
+      case _FinancesViewState.agregarCompra:
+        return 'Nueva Compra';
+      case _FinancesViewState.detalleCompra:
+        return 'Detalle de Compra';
     }
   }
 
   void _handleBack() {
-    if (_currentView == _FinancesViewState.agregarVenta) {
+    if (_currentView == _FinancesViewState.agregarVenta || 
+        _currentView == _FinancesViewState.detalleVenta) {
       setState(() {
         _currentView = _FinancesViewState.ventas;
+        _selectedSale = null;
+      });
+    } else if (_currentView == _FinancesViewState.agregarCompra ||
+               _currentView == _FinancesViewState.detalleCompra) {
+      setState(() {
+        _currentView = _FinancesViewState.compras;
+        _selectedPurchaseOrder = null;
       });
     } else if (_currentView != _FinancesViewState.lista) {
       setState(() {
@@ -103,17 +167,29 @@ class _FinancesScreenState extends State<FinancesScreen> {
         return SalesScreen(
           branchId: widget.branchId,
           onBack: null,
+          onSaleSelected: _onSaleSelected,
         );
       case _FinancesViewState.compras:
         return PurchaseOrdersScreen(
           branchId: widget.branchId,
           onBack: null,
+          onOrderSelected: _onPurchaseOrderSelected,
         );
       case _FinancesViewState.agregarVenta:
         return AddSaleScreen(
           branchId: widget.branchId,
           onSaleAdded: _onSaleAdded,
         );
+      case _FinancesViewState.detalleVenta:
+        return SaleDetailScreen(sale: _selectedSale!);
+      case _FinancesViewState.agregarCompra:
+        return AddPurchaseOrderScreen(
+          branchId: widget.branchId,
+          portfolioId: _portfolioId ?? 0,
+          onOrderAdded: _onPurchaseOrderAdded,
+        );
+      case _FinancesViewState.detalleCompra:
+        return PurchaseOrderDetailScreen(order: _selectedPurchaseOrder!);
     }
   }
 

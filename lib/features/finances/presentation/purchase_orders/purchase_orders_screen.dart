@@ -5,11 +5,13 @@ import '../../domain/entities/purchase_order.dart';
 class PurchaseOrdersScreen extends StatefulWidget {
   final int branchId;
   final VoidCallback? onBack;
+  final Function(PurchaseOrder)? onOrderSelected;
   
   const PurchaseOrdersScreen({
     super.key, 
     required this.branchId,
     this.onBack,
+    this.onOrderSelected,
   });
 
   @override
@@ -27,13 +29,15 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   Color _getStatusColor(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return const Color(0xFFD97706); // Naranja
+      case 'CONFIRMED':
+        return const Color(0xFF3B82F6); // Azul
       case 'COMPLETED':
         return const Color(0xFF10B981); // Verde
       case 'CANCELLED':
@@ -47,6 +51,8 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return 'Pendiente';
+      case 'CONFIRMED':
+        return 'Confirmada';
       case 'COMPLETED':
         return 'Completada';
       case 'CANCELLED':
@@ -185,7 +191,9 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Aquí irá la navegación a detalle de orden de compra
+            if (widget.onOrderSelected != null) {
+              widget.onOrderSelected!(order);
+            }
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -211,9 +219,10 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            order.supplierId != null 
-                                ? 'Proveedor ID: ${order.supplierId}' 
-                                : 'Sin proveedor asignado',
+                            order.providerName ?? 
+                                (order.providerId != null 
+                                    ? 'Proveedor ID: ${order.providerId}' 
+                                    : 'Sin proveedor asignado'),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.black.withValues(alpha: 0.6),
@@ -246,7 +255,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                   color: Colors.grey[300],
                 ),
                 const SizedBox(height: 12),
-                // Fecha y cantidad de items
+                // Fecha y cantidad
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -254,7 +263,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Fecha',
+                          'Fecha de Compra',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.black.withValues(alpha: 0.5),
@@ -263,7 +272,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatDate(order.orderDate),
+                          _formatDate(order.purchaseDate),
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -276,7 +285,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          'Items',
+                          'Cantidad',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.black.withValues(alpha: 0.5),
@@ -285,7 +294,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${order.items.length}',
+                          '${order.quantity}',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -316,7 +325,7 @@ class _PurchaseOrdersScreenState extends State<PurchaseOrdersScreen> {
                       ),
                     ),
                     Text(
-                      '\$${order.totalAmount.toStringAsFixed(2)}',
+                      '\S/.${order.totalAmount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

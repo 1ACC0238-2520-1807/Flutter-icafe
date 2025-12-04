@@ -5,11 +5,13 @@ import '../../domain/entities/sale.dart';
 class SalesScreen extends StatefulWidget {
   final int branchId;
   final VoidCallback? onBack;
+  final Function(Sale)? onSaleSelected;
   
   const SalesScreen({
     super.key, 
     required this.branchId,
     this.onBack,
+    this.onSaleSelected,
   });
 
   @override
@@ -185,7 +187,9 @@ class _SalesScreenState extends State<SalesScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Aquí irá la navegación a detalle de venta
+            if (widget.onSaleSelected != null) {
+              widget.onSaleSelected!(sale);
+            }
           },
           borderRadius: BorderRadius.circular(12),
           child: Padding(
@@ -316,7 +320,7 @@ class _SalesScreenState extends State<SalesScreen> {
                       ),
                     ),
                     Text(
-                      '\$${sale.totalAmount.toStringAsFixed(2)}',
+                      '\S/.${sale.totalAmount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

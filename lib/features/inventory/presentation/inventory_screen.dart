@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'screens/item_list_screen.dart';
+// import 'product_list_screen.dart';
 
 class InventoryScreen extends StatelessWidget {
-  final int branchId;
-  final String sedeName;
+  final String portfolioId;
+  final String selectedSedeId;
 
   const InventoryScreen({
     super.key,
-    required this.branchId,
-    required this.sedeName,
+    required this.portfolioId,
+    required this.selectedSedeId,
   });
 
   @override
   Widget build(BuildContext context) {
+    const oliveGreen = Color(0xFF556B2F);
+    const brownDark = Color(0xFF5D4037);
+    const peach = Color(0xFFFFDAB9);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5E6D3),
       appBar: PreferredSize(
@@ -38,53 +44,67 @@ class InventoryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Encabezado con descripción
             Container(
-              margin: const EdgeInsets.only(bottom: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: oliveGreen,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     'Gestión de Alimentos',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF6F4E37),
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'Administra tus insumos y productos',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: const Color(0xFF8B7355).withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      color: Colors.white70,
                     ),
                   ),
                 ],
               ),
             ),
-            // Botón Administrar Insumos
+            const SizedBox(height: 32),
+
             _buildInventoryButton(
               context,
               icon: Icons.shopping_cart,
               title: 'Administrar Insumos',
               description: 'Gestiona tus insumos y materias primas',
-              backgroundColor: const Color(0xFF8B7355),
+              backgroundColor: peach,
+              iconColor: brownDark,
               onPressed: () {
-                // TODO: Navegar a pantalla de administración de insumos
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ItemListScreen(
+                      portfolioId: portfolioId,
+                      selectedSedeId: selectedSedeId,
+                    ),
+                  ),
+                );
               },
             ),
             const SizedBox(height: 20),
-            // Botón Administrar Productos
+
             _buildInventoryButton(
               context,
               icon: Icons.local_cafe,
               title: 'Administrar Productos',
               description: 'Gestiona los productos de tu cafetería',
-              backgroundColor: const Color(0xFF9E8B7E),
+              backgroundColor: peach,
+              iconColor: brownDark,
               onPressed: () {
-                // TODO: Navegar a pantalla de administración de productos
+                // TODO: Conectar ProductListScreen cuando la tengas lista
+                print("Navegar a Productos");
               },
             ),
           ],
@@ -94,77 +114,53 @@ class InventoryScreen extends StatelessWidget {
   }
 
   Widget _buildInventoryButton(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color backgroundColor,
-    required VoidCallback onPressed,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String description,
+        required Color backgroundColor,
+        required Color iconColor,
+        required VoidCallback onPressed,
+      }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              // Icono
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 36,
-                ),
-              ),
+              Icon(icon, color: iconColor, size: 32),
               const SizedBox(width: 20),
-              // Texto
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: iconColor,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
+                    const SizedBox(height: 4),
                   ],
                 ),
               ),
-              // Flecha
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(Icons.arrow_forward_ios, color: iconColor, size: 16),
             ],
           ),
         ),

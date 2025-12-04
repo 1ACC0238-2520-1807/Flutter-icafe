@@ -32,6 +32,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   void initState() {
     super.initState();
+    
     _floatingIconController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -56,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     throw Exception('No portfolio ID found');
   }
 
-  @override
+   @override
   void dispose() {
     _floatingIconController.dispose();
     super.dispose();
@@ -84,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
+            (route) => false,
       );
     }
   }
@@ -106,8 +107,8 @@ class _DashboardScreenState extends State<DashboardScreen>
         );
       case 2:
         return InventoryScreen(
-          branchId: widget.branchId,
-          sedeName: widget.sedeName,
+          portfolioId: '', 
+          selectedSedeId: '',
         );
       case 3:
         return FinancesScreen(
@@ -126,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget _buildDashboardContent() {
     return Scaffold(
       backgroundColor: const Color(0xFFF5E6D3),
-      appBar: CustomAppBar(
+     appBar: CustomAppBar(
         title: 'Inicio',
         onBackPressed: null,
         actions: [
@@ -158,10 +159,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                     size: 48,
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     'Error al cargar datos',
                     style: TextStyle(
-                      color: const Color(0xFF6F4E37),
+                      color: Color(0xFF6F4E37),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -181,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF8B7355),
                     ),
-                    child: const Text('Reintentar'),
+                    child: const Text('Reintentar', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -200,12 +201,12 @@ class _DashboardScreenState extends State<DashboardScreen>
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildSedeCard(dashboardData['sedeName'] as String),
+                _buildSedeCard(dashboardData['sedeName'] as String? ?? widget.sedeName),
                 const SizedBox(height: 24),
                 _buildSalesStatsCard(
-                  dashboardData['totalSalesAmount'] as double,
-                  dashboardData['totalSalesCount'] as int,
-                  dashboardData['averageSaleAmount'] as double,
+                  (dashboardData['totalSalesAmount'] as num?)?.toDouble() ?? 0.0,
+                  (dashboardData['totalSalesCount'] as num?)?.toInt() ?? 0,
+                  (dashboardData['averageSaleAmount'] as num?)?.toDouble() ?? 0.0,
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -213,7 +214,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Empleados',
-                        value: (dashboardData['totalEmployees'] as int).toString(),
+                        value: (dashboardData['totalEmployees'] ?? 0).toString(),
                         icon: Icons.people,
                       ),
                     ),
@@ -221,7 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Proveedores',
-                        value: (dashboardData['totalProviders'] as int).toString(),
+                        value: (dashboardData['totalProviders'] ?? 0).toString(),
                         icon: Icons.local_shipping,
                       ),
                     ),
@@ -233,7 +234,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Insumos',
-                        value: (dashboardData['totalSupplyItems'] as int).toString(),
+                        value: (dashboardData['totalSupplyItems'] ?? 0).toString(),
                         icon: Icons.shopping_basket,
                       ),
                     ),
@@ -241,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Productos',
-                        value: (dashboardData['totalProducts'] as int).toString(),
+                        value: (dashboardData['totalProducts'] ?? 0).toString(),
                         icon: Icons.local_cafe,
                       ),
                     ),
@@ -253,7 +254,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Ventas Totales',
-                        value: (dashboardData['totalSalesAmount'] as double).toStringAsFixed(2),
+                        value: ((dashboardData['totalSalesAmount'] as num?)?.toDouble() ?? 0.0).toStringAsFixed(2),
                         icon: Icons.monetization_on,
                         unit: 'S/.',
                       ),
@@ -262,7 +263,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     Expanded(
                       child: _buildMetricCard(
                         title: 'Compras Totales',
-                        value: (dashboardData['totalPurchasesAmount'] as double).toStringAsFixed(2),
+                        value: ((dashboardData['totalPurchasesAmount'] as num?)?.toDouble() ?? 0.0).toStringAsFixed(2),
                         icon: Icons.shopping_cart,
                         unit: 'S/.',
                       ),
@@ -357,10 +358,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildSalesStatsCard(
-    double totalSalesAmount,
-    int totalSalesCount,
-    double averageSaleAmount,
-  ) {
+      double totalSalesAmount,
+      int totalSalesCount,
+      double averageSaleAmount,
+      ) {
     return Card(
       color: const Color(0xFFF5D5C8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -379,7 +380,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             const SizedBox(height: 8),
             Divider(
-              color: const Color(0xFF6F4E37).withValues(alpha:0.2),
+              color: const Color(0xFF6F4E37).withOpacity(0.2),
               thickness: 1,
             ),
             const SizedBox(height: 12),

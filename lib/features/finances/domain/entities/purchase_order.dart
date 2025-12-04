@@ -1,66 +1,74 @@
 class PurchaseOrder {
   final int id;
-  final int? supplierId;
   final int branchId;
-  final List<PurchaseOrderItem> items;
+  final int? providerId;
+  final String? providerName;
+  final String? providerEmail;
+  final String? providerPhone;
+  final String? providerRuc;
+  final int? supplyItemId;
+  final double unitPrice;
+  final double quantity;
   final double totalAmount;
-  final DateTime orderDate;
+  final DateTime purchaseDate;
+  final DateTime? expirationDate;
   final String status;
   final String? notes;
 
   PurchaseOrder({
     required this.id,
-    this.supplierId,
     required this.branchId,
-    required this.items,
+    this.providerId,
+    this.providerName,
+    this.providerEmail,
+    this.providerPhone,
+    this.providerRuc,
+    this.supplyItemId,
+    required this.unitPrice,
+    required this.quantity,
     required this.totalAmount,
-    required this.orderDate,
+    required this.purchaseDate,
+    this.expirationDate,
     required this.status,
     this.notes,
   });
 
   factory PurchaseOrder.fromJson(Map<String, dynamic> json) {
-    List<PurchaseOrderItem> itemsList = [];
-    if (json['items'] != null) {
-      itemsList = (json['items'] as List)
-          .map((item) => PurchaseOrderItem.fromJson(item as Map<String, dynamic>))
-          .toList();
-    }
-
     return PurchaseOrder(
       id: (json['id'] as num?)?.toInt() ?? 0,
-      supplierId: (json['supplierId'] as num?)?.toInt(),
       branchId: (json['branchId'] as num?)?.toInt() ?? 0,
-      items: itemsList,
+      providerId: (json['providerId'] as num?)?.toInt(),
+      providerName: json['providerName'] as String?,
+      providerEmail: json['providerEmail'] as String?,
+      providerPhone: json['providerPhone'] as String?,
+      providerRuc: json['providerRuc'] as String?,
+      supplyItemId: (json['supplyItemId'] as num?)?.toInt(),
+      unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      orderDate: json['orderDate'] != null 
-          ? DateTime.parse(json['orderDate'] as String)
+      purchaseDate: json['purchaseDate'] != null 
+          ? DateTime.parse(json['purchaseDate'] as String)
           : DateTime.now(),
-      status: json['status'] as String? ?? 'Pending',
+      expirationDate: json['expirationDate'] != null 
+          ? DateTime.parse(json['expirationDate'] as String)
+          : null,
+      status: json['status'] as String? ?? 'PENDING',
       notes: json['notes'] as String?,
     );
   }
-}
 
-class PurchaseOrderItem {
-  final int productId;
-  final int quantity;
-  final double unitPrice;
-  final double subtotal;
-
-  PurchaseOrderItem({
-    required this.productId,
-    required this.quantity,
-    required this.unitPrice,
-    required this.subtotal,
-  });
-
-  factory PurchaseOrderItem.fromJson(Map<String, dynamic> json) {
-    return PurchaseOrderItem(
-      productId: (json['productId'] as num?)?.toInt() ?? 0,
-      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
-      unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
-      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'providerId': providerId,
+      'supplyItemId': supplyItemId,
+      'unitPrice': unitPrice,
+      'quantity': quantity,
+      'totalAmount': totalAmount,
+      'purchaseDate': purchaseDate.toIso8601String().split('T')[0],
+      'expirationDate': expirationDate?.toIso8601String().split('T')[0],
+      'status': status,
+      'notes': notes,
+    };
   }
 }
